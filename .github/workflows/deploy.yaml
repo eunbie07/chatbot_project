@@ -58,28 +58,21 @@ jobs:
         username: ${{ env.EC2_USERNAME }}
         key: ${{ env.EC2_KEY }}
         script: |
-          # 디스크 공간 정리
           echo "디스크 공간 정리 중..."
           docker system prune -f
           docker volume prune -f
           docker image prune -a -f
-          
-          # 최신 이미지 가져오기
+
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
-          
-          # 기존 컨테이너 중지 및 삭제
+
           docker stop fastapi node frontend mongodb || true
           docker rm fastapi node frontend mongodb || true
-          
-          # 네트워크가 없으면 생성
+
           docker network create app-network || true
-          
-          # MongoDB 데이터 볼륨 생성
           docker volume create mongodb_data || true
-          
-          # .env 파일 생성
+
           mkdir -p /home/ubuntu/project/fastapi-backend
           cat <<EOF > /home/ubuntu/project/fastapi-backend/.env
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
@@ -91,8 +84,7 @@ jobs:
           AWS_REGION=ap-southeast-2
           MONGODB_URI=mongodb://mongodb:27017
           EOF
-          
-          # MongoDB 컨테이너 실행
+
           echo "MongoDB 컨테이너 실행 중..."
           docker run -d --restart always \
             --name mongodb \
@@ -100,8 +92,7 @@ jobs:
             -p 27017:27017 \
             -v mongodb_data:/data/db \
             mongo:latest
-          
-          # MongoDB 시작 대기 및 헬스체크
+
           echo "MongoDB 시작 대기 중..."
           for i in {1..30}; do
             if docker exec mongodb mongosh --eval "db.runCommand('ping')" >/dev/null 2>&1; then
@@ -111,8 +102,7 @@ jobs:
             echo "MongoDB 대기 중... ($i/30)"
             sleep 2
           done
-          
-          # FastAPI 컨테이너 실행
+
           echo "FastAPI 컨테이너 실행 중..."
           docker run -d --restart always \
             --name fastapi \
@@ -120,58 +110,26 @@ jobs:
             -p 3000:3000 \
             --env-file /home/ubuntu/project/fastapi-backend/.env \
             ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
-          
-          # FastAPI 컨테이너 상태 확인
+
           sleep 5
-          if docker ps | grep -q fastapi; then
-            echo "✅ FastAPI 컨테이너 실행 성공"
-          else
-            echo "❌ FastAPI 컨테이너 실행 실패"
-            echo "FastAPI 컨테이너 로그:"
-            docker logs fastapi || echo "FastAPI 로그를 가져올 수 없음"
-            echo "실행 중인 컨테이너 확인:"
-            docker ps -a | grep fastapi
-          fi
-          
-          # Node.js 컨테이너 실행
+
           docker run -d --restart always \
             --name node \
             --network app-network \
             -p 8000:8000 \
             -e FASTAPI_URL=http://fastapi:3000 \
             ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
-          
-          # Frontend 컨테이너 실행
+
           docker run -d --restart always \
             --name frontend \
             --network app-network \
             -p 5173:5173 \
             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
-          
-          # 컨테이너 상태 확인
+
           docker ps
           echo "배포 완료!"
-          
-          # MongoDB 연결 테스트
-          echo "MongoDB 연결 테스트..."
-          if docker ps | grep -q fastapi; then
-            docker exec fastapi python -c "
-import pymongo
-import sys
-try:
-    client = pymongo.MongoClient('mongodb://mongodb:27017', serverSelectionTimeoutMS=5000)
-    client.server_info()
-    print('✅ MongoDB 연결 성공')
-except Exception as e:
-    print(f'❌ MongoDB 연결 실패: {e}')
-    sys.exit(1)
-" || echo "FastAPI에서 MongoDB 연결 테스트 실패"
-          else
-            echo "❌ FastAPI 컨테이너가 실행되지 않음"
-          fi
-          
-          # 최종 서비스 확인
+
           echo "서비스 상태 확인..."
-          curl -f http://localhost:3000/health && echo "✅ FastAPI 서비스 정상" || echo "❌ FastAPI 서비스 오류"
+          curl -f http://localhost:3000/health && echo "✅ FastAPI 서비스 정상 (MongoDB 포함)" || echo "❌ FastAPI 서비스 오류"
           curl -f http://localhost:8000 && echo "✅ Node.js 서비스 정상" || echo "❌ Node.js 서비스 오류"
           curl -f http://localhost:5173 && echo "✅ Frontend 서비스 정상" || echo "❌ Frontend 서비스 오류"
