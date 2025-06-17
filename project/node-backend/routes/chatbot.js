@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const response = await axios.post('http://13.237.236.117:3000/chat', req.body);
+    const response = await axios.post('http://localhost:3000//chat', req.body);
     console.log('🟣 /api/chat 요청 도착:', req.body);
     res.json(response.data);
   } catch (err) {

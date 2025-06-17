@@ -8,7 +8,7 @@ router.get('/:userId', async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const response = await axios.get(`http://13.237.236.117:3000/actuals/${userId}`);
+    const response = await axios.get(`http://localhost:3000//actuals/${userId}`);
     res.json(response.data);
   } catch (error) {
     console.error('FastAPI 연동 오류:', error.message);

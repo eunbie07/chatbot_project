@@ -18,14 +18,14 @@ function BudgetCoach({ userId = "user_male", onResult }) {
     setSummaryMessage('');
 
     try {
-      const res = await axios.get(`http://13.237.236.117:8000/api/coach/${userId}`);
+      const res = await axios.get(`/api/coach/${userId}`);
       if (res.data.error) {
         setError(res.data.error);
         return;
       }
       setData(res.data);
 
-      const actualRes = await axios.get(`http://13.237.236.117:8000/api/actuals/${userId}`);
+      const actualRes = await axios.get(`/api/actuals/${userId}`);
       const actualData = actualRes.data.actuals || {};
       setActuals(actualData);
 
