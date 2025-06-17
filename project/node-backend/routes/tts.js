@@ -25,7 +25,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const response = await axios.post('http://localhost:3000//tts', req.body, {
+    const response = await axios.post('http://localhost:3000/tts', req.body, {
       responseType: 'arraybuffer',
     });
 

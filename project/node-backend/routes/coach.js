@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const response = await axios.get(`http://localhost:3000//coach/${userId}`);
+    const response = await axios.get(`http://localhost:3000/coach/${userId}`);
     res.json(response.data);
   } catch (err) {
     console.error('AI 코치 프록시 오류:', err.message);
