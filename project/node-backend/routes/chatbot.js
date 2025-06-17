@@ -1,11 +1,14 @@
+# 컨테이너 안에서 (이미 들어가 있으니)
+cat > ./routes/chatbot.js << 'EOF'
 const express = require('express');
 const axios = require('axios');
-
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const response = await axios.post('http://localhost:3000/fastapi/chat', req.body);
+    // 환경변수 사용하고, 없으면 기본값 사용
+    const fastApiUrl = process.env.FASTAPI_URL || 'http://localhost:3000';
+    const response = await axios.post(`${fastApiUrl}/chat`, req.body);
     console.log('🟣 /api/chat 요청 도착:', req.body);
     res.json(response.data);
   } catch (err) {
@@ -14,4 +17,5 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router; // ✅ CommonJS 방식
+module.exports = router;
+EOF
