@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>소비 요약</title></head>
+<body>
+  <h2>소비 요약 조회</h2>
+  <input type="text" id="user_id" placeholder="user_female 등">
+  <button onclick="fetchSummary()">조회</button>
+  <pre id="result"></pre>
+
+  <script>
+    async function fetchSummary() {
+      const userId = document.getElementById("user_id").value;
+      const res = await fetch(`http://localhost:3000/summary/${userId}`);
+      const data = await res.json();
+      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>

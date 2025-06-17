@@ -1,0 +1,121 @@
+[
+  {
+    "date": "2025-05-01",
+    "type": "income",
+    "category": "월급",
+    "amount": 2200000,
+    "description": "5월 급여 (세후)"
+  },
+  {
+    "date": "2025-05-02",
+    "type": "expense",
+    "category": "주거",
+    "amount": 500000,
+    "description": "원룸 월세"
+  },
+  {
+    "date": "2025-05-03",
+    "type": "expense",
+    "category": "식비",
+    "amount": 12000,
+    "description": "점심 (백반)"
+  },
+  {
+    "date": "2025-05-04",
+    "type": "expense",
+    "category": "카페",
+    "amount": 4100,
+    "description": "이디야 아메리카노"
+  },
+  {
+    "date": "2025-05-05",
+    "type": "expense",
+    "category": "교통",
+    "amount": 40000,
+    "description": "교통카드 충전"
+  },
+  {
+    "date": "2025-05-06",
+    "type": "expense",
+    "category": "식비",
+    "amount": 10000,
+    "description": "점심 도시락"
+  },
+  {
+    "date": "2025-05-08",
+    "type": "expense",
+    "category": "구독",
+    "amount": 10900,
+    "description": "넷플릭스"
+  },
+  {
+    "date": "2025-05-10",
+    "type": "expense",
+    "category": "카페",
+    "amount": 4600,
+    "description": "투썸 카페라떼"
+  },
+  {
+    "date": "2025-05-12",
+    "type": "expense",
+    "category": "식비",
+    "amount": 15000,
+    "description": "주말 외식 (라멘)"
+  },
+  {
+    "date": "2025-05-15",
+    "type": "expense",
+    "category": "편의점",
+    "amount": 3500,
+    "description": "야식"
+  },
+  {
+    "date": "2025-05-17",
+    "type": "expense",
+    "category": "쇼핑",
+    "amount": 65000,
+    "description": "티셔츠, 반바지 구매"
+  },
+  {
+    "date": "2025-05-20",
+    "type": "expense",
+    "category": "문화",
+    "amount": 15000,
+    "description": "영화 '퓨리오사'"
+  },
+  {
+    "date": "2025-05-21",
+    "type": "expense",
+    "category": "식비",
+    "amount": 13000,
+    "description": "점심 (제육볶음)"
+  },
+  {
+    "date": "2025-05-23",
+    "type": "expense",
+    "category": "여가",
+    "amount": 25000,
+    "description": "한강 자전거 대여 + 야시장"
+  },
+  {
+    "date": "2025-05-25",
+    "type": "expense",
+    "category": "카페",
+    "amount": 5000,
+    "description": "스타벅스 디카페인"
+  },
+  {
+    "date": "2025-05-27",
+    "type": "expense",
+    "category": "식비",
+    "amount": 9500,
+    "description": "편의점 도시락"
+  },
+  {
+    "date": "2025-05-30",
+    "type": "expense",
+    "category": "구독",
+    "amount": 8900,
+    "description": "멜론 스트리밍"
+  }
+]

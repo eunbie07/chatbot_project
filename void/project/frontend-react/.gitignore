@@ -1,0 +1,79 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+## .env
+.env
+
+## c program
+c/*
+c/*.o
+!c/**/*.c
+!c/**/*.h
+!c/**/*.a
+!c/**/Makefile*
+
+## Java
+**/*.class
+
+## Scala
+scala/**/project
+scala/**/target
+
+## Maven
+maven/**/target
+
+## nodejs
+node/**/node_modules
+node/**/package-lock.json
+node/**/.serverless
+
+## python
+.idea
+secret.json
+**/.venv
+**/**/.venv
+**/__pycache__/
+**/secret.json
+venv/
+.venv/
+/test/project/backend-fastapi/venv
+/test/fastapi/.venv
+/test/fastapi/__pycache__
+
+## mongodb
+mongodb/backup
+
+## oracle
+oracle/node/dbConfig.js
+oracle/**/node_modules
+oracle/**/package-lock.json
+
+## docker
+docker/mysql/mysql*
+docker/mongodb/mongo*
+
+
+react/**/.git
+nestjs/**/.git

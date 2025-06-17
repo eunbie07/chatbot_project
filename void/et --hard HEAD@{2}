@@ -1,0 +1,45 @@
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{0}: pull --rebase origin eunbie07 (finish): returning to refs/heads/eunbie07
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{1}: pull --rebase origin eunbie07 (start): checkout f54771a485bfadf8fa195cb19c42a8f91e6b2f79
+[33m97e94b0[m HEAD@{2}: commit: .gitignore
+[33mf4a1f64[m HEAD@{3}: filter-branch: rewrite
+[33mb08afad[m HEAD@{4}: commit: remove
+[33m54831fb[m HEAD@{5}: commit: Remove large files from tracking
+[33m1706f68[m HEAD@{6}: commit: dummy_json
+[33m8bc1a63[m HEAD@{7}: commit: test
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{8}: checkout: moving from dxorud to eunbie07
+[33m7958765[m HEAD@{9}: checkout: moving from main to dxorud
+[33mdd023e3[m HEAD@{10}: checkout: moving from eunbie07 to main
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{11}: checkout: moving from main to eunbie07
+[33mdd023e3[m HEAD@{12}: checkout: moving from dxorud to main
+[33m7958765[m HEAD@{13}: checkout: moving from eunbie07 to dxorud
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{14}: checkout: moving from dxorud to eunbie07
+[33m7958765[m HEAD@{15}: checkout: moving from dxorud to dxorud
+[33m7958765[m HEAD@{16}: checkout: moving from main to dxorud
+[33mdd023e3[m HEAD@{17}: checkout: moving from eunbie07 to main
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{18}: checkout: moving from dxorud to eunbie07
+[33m7958765[m HEAD@{19}: commit: delete
+[33mc7db7d8[m HEAD@{20}: checkout: moving from eunbie07 to dxorud
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{21}: checkout: moving from main to eunbie07
+[33mdd023e3[m HEAD@{22}: checkout: moving from dxorud to main
+[33mc7db7d8[m HEAD@{23}: checkout: moving from eunbie07 to dxorud
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{24}: checkout: moving from main to eunbie07
+[33mdd023e3[m HEAD@{25}: checkout: moving from main to main
+[33mdd023e3[m HEAD@{26}: checkout: moving from main to main
+[33mdd023e3[m HEAD@{27}: checkout: moving from eunbie07 to main
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{28}: checkout: moving from main to eunbie07
+[33mdd023e3[m HEAD@{29}: commit: delete
+[33me7ab588[m HEAD@{30}: commit: dxorud start
+[33me6208f2[m HEAD@{31}: checkout: moving from main to main
+[33me6208f2[m HEAD@{32}: checkout: moving from main to main
+[33me6208f2[m HEAD@{33}: checkout: moving from eunbie07 to main
+[33mf54771a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32meunbie07[m[33m, [m[1;31morigin/eunbie07[m[33m)[m HEAD@{34}: commit: docker
+[33mc7db7d8[m HEAD@{35}: checkout: moving from dxorud to eunbie07
+[33mc7db7d8[m HEAD@{36}: checkout: moving from dxorud to dxorud
+[33mc7db7d8[m HEAD@{37}: checkout: moving from dxorud to dxorud
+[33mc7db7d8[m HEAD@{38}: checkout: moving from dxorud to dxorud
+[33mc7db7d8[m HEAD@{39}: checkout: moving from eunbie07 to dxorud
+[33mc7db7d8[m HEAD@{40}: checkout: moving from main to eunbie07
+[33me6208f2[m HEAD@{41}: checkout: moving from eunbie07 to main
+[33mc7db7d8[m HEAD@{42}: checkout: moving from eunbie07 to eunbie07
+[33mc7db7d8[m HEAD@{43}: checkout: moving from main to eunbie07
+[33me6208f2[m HEAD@{44}: clone: from https://github.com/eunbie07/core_project.git

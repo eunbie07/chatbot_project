@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  node:
+    build: ./backend-node
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/public
+    environment:
+      - FASTAPI_HOST=fastapi
+      - MYSQL_HOST=mysql
+      - MONGO_HOST=mongo
+    depends_on:
+      - fastapi
+      - mysql
+      - mongo
+
+  fastapi:
+    build: ./backend-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_HOST=mysql
+      - MONGO_HOST=mongo
+
+  mysql:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: app_db
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mongo:
+    image: mongo:5
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+
+volumes:
+  mongo-data:

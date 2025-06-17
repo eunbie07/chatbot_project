@@ -1,0 +1,71 @@
+name: Deploy Multi-App to EC2
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# env:
+#   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+#   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+#   AWS_REGION: ap-northeast-2
+#   EC2_HOST: ${{ secrets.HOST }}
+#   EC2_USERNAME: ${{ secrets.USERNAME }}
+#   EC2_KEY: ${{ secrets.KEY }}
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout Code
+#       uses: actions/checkout@v4
+
+#     - name: Docker Hub Login
+#       uses: docker/login-action@v3
+#       with:
+#         username: ${{ env.DOCKER_HUB_USERNAME }}
+#         password: ${{ env.DOCKER_HUB_TOKEN }}
+
+#     - name: Build and Push FastAPI Backend
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: ./fastapi-backend
+#         file: ./fastapi-backend/Dockerfile
+#         push: true
+#         tags: ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+
+#     - name: Build and Push Node Backend
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: ./node-backend
+#         file: ./node-backend/Dockerfile
+#         push: true
+#         tags: ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+
+#     - name: Build and Push Frontend
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: ./frontend
+#         file: ./frontend/Dockerfile
+#         push: true
+#         tags: ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+
+#     - name: SSH to EC2 and Deploy
+#       uses: appleboy/ssh-action@master
+#       with:
+#         host: ${{ env.EC2_HOST }}
+#         username: ${{ env.EC2_USERNAME }}
+#         key: ${{ env.EC2_KEY }}
+#         script: |
+#           docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+#           docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+#           docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+
+#           docker stop fastapi || true && docker rm fastapi || true
+#           docker stop node || true && docker rm node || true
+#           docker stop frontend || true && docker rm frontend || true
+
+#           docker run -d --restart always --name fastapi -p 3000:3000 ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+#           docker run -d --restart always --name node -p 8000:8000 ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+#           docker run -d --restart always --name frontend -p 80:80 ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest

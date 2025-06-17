@@ -1,0 +1,121 @@
+[
+  {
+    "date": "2025-05-01",
+    "type": "income",
+    "category": "월급",
+    "amount": 2500000,
+    "description": "5월 월급 (세후)"
+  },
+  {
+    "date": "2025-05-01",
+    "type": "expense",
+    "category": "주거",
+    "amount": 650000,
+    "description": "원룸 월세 자동이체"
+  },
+  {
+    "date": "2025-05-03",
+    "type": "expense",
+    "category": "식비",
+    "amount": 14000,
+    "description": "직장 근처 점심 (한식)"
+  },
+  {
+    "date": "2025-05-04",
+    "type": "expense",
+    "category": "카페",
+    "amount": 5200,
+    "description": "스타벅스 라떼"
+  },
+  {
+    "date": "2025-05-06",
+    "type": "expense",
+    "category": "교통",
+    "amount": 50000,
+    "description": "교통카드 충전"
+  },
+  {
+    "date": "2025-05-07",
+    "type": "expense",
+    "category": "쇼핑",
+    "amount": 90000,
+    "description": "여름 옷 쇼핑"
+  },
+  {
+    "date": "2025-05-08",
+    "type": "income",
+    "category": "부수입",
+    "amount": 70000,
+    "description": "중고나라 판매"
+  },
+  {
+    "date": "2025-05-09",
+    "type": "expense",
+    "category": "카페",
+    "amount": 4800,
+    "description": "이디야 아메리카노"
+  },
+  {
+    "date": "2025-05-11",
+    "type": "expense",
+    "category": "구독",
+    "amount": 10900,
+    "description": "넷플릭스"
+  },
+  {
+    "date": "2025-05-12",
+    "type": "expense",
+    "category": "식비",
+    "amount": 15000,
+    "description": "주말 외식"
+  },
+  {
+    "date": "2025-05-15",
+    "type": "expense",
+    "category": "편의점",
+    "amount": 4000,
+    "description": "야식"
+  },
+  {
+    "date": "2025-05-18",
+    "type": "expense",
+    "category": "뷰티",
+    "amount": 60000,
+    "description": "올리브영"
+  },
+  {
+    "date": "2025-05-20",
+    "type": "expense",
+    "category": "카페",
+    "amount": 4900,
+    "description": "할리스 라떼"
+  },
+  {
+    "date": "2025-05-23",
+    "type": "expense",
+    "category": "식비",
+    "amount": 8500,
+    "description": "점심 도시락"
+  },
+  {
+    "date": "2025-05-25",
+    "type": "expense",
+    "category": "문화",
+    "amount": 15000,
+    "description": "영화 관람"
+  },
+  {
+    "date": "2025-05-28",
+    "type": "expense",
+    "category": "여가",
+    "amount": 45000,
+    "description": "요가 수업"
+  },
+  {
+    "date": "2025-05-30",
+    "type": "expense",
+    "category": "카페",
+    "amount": 5300,
+    "description": "스타벅스 디카페인"
+  }
+]

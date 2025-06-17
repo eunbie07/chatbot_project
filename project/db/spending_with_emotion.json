@@ -1,0 +1,585 @@
+[
+  {
+    "_id": {
+      "$oid": "6832d5de27c86436aa8a394d"
+    },
+    "user_id": "user_female",
+    "month": "2025-05",
+    "data": [
+      {
+        "date": "2025-05-01",
+        "type": "income",
+        "category": "월급",
+        "amount": 2500000,
+        "description": "5월 월급 (세후)"
+      },
+      {
+        "date": "2025-05-01",
+        "type": "expense",
+        "category": "주거",
+        "amount": 650000,
+        "description": "원룸 월세 자동이체",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-03",
+        "type": "expense",
+        "category": "식비",
+        "amount": 14000,
+        "description": "직장 근처 점심 (한식)",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-04",
+        "type": "expense",
+        "category": "카페",
+        "amount": 5200,
+        "description": "스타벅스 라떼",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-06",
+        "type": "expense",
+        "category": "교통",
+        "amount": 50000,
+        "description": "교통카드 충전",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-07",
+        "type": "expense",
+        "category": "쇼핑",
+        "amount": 90000,
+        "description": "여름 옷 쇼핑",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-08",
+        "type": "income",
+        "category": "부수입",
+        "amount": 70000,
+        "description": "중고나라 판매"
+      },
+      {
+        "date": "2025-05-09",
+        "type": "expense",
+        "category": "카페",
+        "amount": 4800,
+        "description": "이디야 아메리카노",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-11",
+        "type": "expense",
+        "category": "구독",
+        "amount": 10900,
+        "description": "넷플릭스",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-12",
+        "type": "expense",
+        "category": "식비",
+        "amount": 15000,
+        "description": "주말 외식",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-15",
+        "type": "expense",
+        "category": "편의점",
+        "amount": 4000,
+        "description": "야식",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-18",
+        "type": "expense",
+        "category": "뷰티",
+        "amount": 60000,
+        "description": "올리브영",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-20",
+        "type": "expense",
+        "category": "카페",
+        "amount": 4900,
+        "description": "할리스 라떼",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-23",
+        "type": "expense",
+        "category": "식비",
+        "amount": 8500,
+        "description": "점심 도시락",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-25",
+        "type": "expense",
+        "category": "문화",
+        "amount": 15000,
+        "description": "영화 관람",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-28",
+        "type": "expense",
+        "category": "여가",
+        "amount": 45000,
+        "description": "요가 수업",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-30",
+        "type": "expense",
+        "category": "카페",
+        "amount": 5300,
+        "description": "스타벅스 디카페인",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "6832d5de27c86436aa8a394e"
+    },
+    "user_id": "user_male",
+    "month": "2025-05",
+    "data": [
+      {
+        "date": "2025-05-01",
+        "type": "income",
+        "category": "월급",
+        "amount": 2500000,
+        "description": "5월 급여 (세후)"
+      },
+      {
+        "date": "2025-05-01",
+        "type": "expense",
+        "category": "주거",
+        "amount": 600000,
+        "description": "오피스텔 월세",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-03",
+        "type": "expense",
+        "category": "식비",
+        "amount": 18000,
+        "description": "회사 근처 점심 + 커피",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-04",
+        "type": "expense",
+        "category": "카페",
+        "amount": 4800,
+        "description": "스타벅스 아메리카노",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-05",
+        "type": "expense",
+        "category": "게임",
+        "amount": 49000,
+        "description": "스팀 게임 결제",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-06",
+        "type": "expense",
+        "category": "교통",
+        "amount": 45000,
+        "description": "교통카드 충전",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-07",
+        "type": "expense",
+        "category": "식비",
+        "amount": 13000,
+        "description": "회식비 자부담",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-09",
+        "type": "expense",
+        "category": "쇼핑",
+        "amount": 120000,
+        "description": "운동화 구매 (나이키)",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-11",
+        "type": "expense",
+        "category": "구독",
+        "amount": 10900,
+        "description": "넷플릭스",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-12",
+        "type": "expense",
+        "category": "편의점",
+        "amount": 6000,
+        "description": "야식 (맥주 + 과자)",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-15",
+        "type": "expense",
+        "category": "식비",
+        "amount": 15000,
+        "description": "혼밥 (삼겹살)",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-17",
+        "type": "expense",
+        "category": "운동",
+        "amount": 70000,
+        "description": "헬스장 월 이용료",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-20",
+        "type": "expense",
+        "category": "카페",
+        "amount": 5300,
+        "description": "투썸 라떼",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-22",
+        "type": "expense",
+        "category": "식비",
+        "amount": 14500,
+        "description": "외식 (버거 + 음료)",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-24",
+        "type": "expense",
+        "category": "문화",
+        "amount": 18000,
+        "description": "영화 '듄2'",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-25",
+        "type": "expense",
+        "category": "구독",
+        "amount": 8900,
+        "description": "유튜브 프리미엄",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-27",
+        "type": "expense",
+        "category": "쇼핑",
+        "amount": 85000,
+        "description": "반팔 셔츠 + 슬랙스",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-30",
+        "type": "expense",
+        "category": "카페",
+        "amount": 4800,
+        "description": "이디야 아이스커피",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "6832d5de27c86436aa8a394f"
+    },
+    "user_id": "user_young",
+    "month": "2025-05",
+    "data": [
+      {
+        "date": "2025-05-01",
+        "type": "income",
+        "category": "월급",
+        "amount": 2200000,
+        "description": "5월 급여 (세후)"
+      },
+      {
+        "date": "2025-05-02",
+        "type": "expense",
+        "category": "주거",
+        "amount": 500000,
+        "description": "원룸 월세",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-03",
+        "type": "expense",
+        "category": "식비",
+        "amount": 12000,
+        "description": "점심 (백반)",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-04",
+        "type": "expense",
+        "category": "카페",
+        "amount": 4100,
+        "description": "이디야 아메리카노",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-05",
+        "type": "expense",
+        "category": "교통",
+        "amount": 40000,
+        "description": "교통카드 충전",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-06",
+        "type": "expense",
+        "category": "식비",
+        "amount": 10000,
+        "description": "점심 도시락",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-08",
+        "type": "expense",
+        "category": "구독",
+        "amount": 10900,
+        "description": "넷플릭스",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-10",
+        "type": "expense",
+        "category": "카페",
+        "amount": 4600,
+        "description": "투썸 카페라떼",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-12",
+        "type": "expense",
+        "category": "식비",
+        "amount": 15000,
+        "description": "주말 외식 (라멘)",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-15",
+        "type": "expense",
+        "category": "편의점",
+        "amount": 3500,
+        "description": "야식",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-17",
+        "type": "expense",
+        "category": "쇼핑",
+        "amount": 65000,
+        "description": "티셔츠, 반바지 구매",
+        "emotion": {
+          "label": "무감정",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-20",
+        "type": "expense",
+        "category": "문화",
+        "amount": 15000,
+        "description": "영화 '퓨리오사'",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-21",
+        "type": "expense",
+        "category": "식비",
+        "amount": 13000,
+        "description": "점심 (제육볶음)",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-23",
+        "type": "expense",
+        "category": "여가",
+        "amount": 25000,
+        "description": "한강 자전거 대여 + 야시장",
+        "emotion": {
+          "label": "스트레스",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-25",
+        "type": "expense",
+        "category": "카페",
+        "amount": 5000,
+        "description": "스타벅스 디카페인",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-27",
+        "type": "expense",
+        "category": "식비",
+        "amount": 9500,
+        "description": "편의점 도시락",
+        "emotion": {
+          "label": "우울",
+          "source": "user"
+        }
+      },
+      {
+        "date": "2025-05-30",
+        "type": "expense",
+        "category": "구독",
+        "amount": 8900,
+        "description": "멜론 스트리밍",
+        "emotion": {
+          "label": "기쁨",
+          "source": "user"
+        }
+      }
+    ]
+  }
+]

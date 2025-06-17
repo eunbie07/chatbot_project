@@ -1,0 +1,128 @@
+[
+  {
+    "date": "2025-05-01",
+    "type": "income",
+    "category": "월급",
+    "amount": 2500000,
+    "description": "5월 급여 (세후)"
+  },
+  {
+    "date": "2025-05-01",
+    "type": "expense",
+    "category": "주거",
+    "amount": 600000,
+    "description": "오피스텔 월세"
+  },
+  {
+    "date": "2025-05-03",
+    "type": "expense",
+    "category": "식비",
+    "amount": 18000,
+    "description": "회사 근처 점심 + 커피"
+  },
+  {
+    "date": "2025-05-04",
+    "type": "expense",
+    "category": "카페",
+    "amount": 4800,
+    "description": "스타벅스 아메리카노"
+  },
+  {
+    "date": "2025-05-05",
+    "type": "expense",
+    "category": "게임",
+    "amount": 49000,
+    "description": "스팀 게임 결제"
+  },
+  {
+    "date": "2025-05-06",
+    "type": "expense",
+    "category": "교통",
+    "amount": 45000,
+    "description": "교통카드 충전"
+  },
+  {
+    "date": "2025-05-07",
+    "type": "expense",
+    "category": "식비",
+    "amount": 13000,
+    "description": "회식비 자부담"
+  },
+  {
+    "date": "2025-05-09",
+    "type": "expense",
+    "category": "쇼핑",
+    "amount": 120000,
+    "description": "운동화 구매 (나이키)"
+  },
+  {
+    "date": "2025-05-11",
+    "type": "expense",
+    "category": "구독",
+    "amount": 10900,
+    "description": "넷플릭스"
+  },
+  {
+    "date": "2025-05-12",
+    "type": "expense",
+    "category": "편의점",
+    "amount": 6000,
+    "description": "야식 (맥주 + 과자)"
+  },
+  {
+    "date": "2025-05-15",
+    "type": "expense",
+    "category": "식비",
+    "amount": 15000,
+    "description": "혼밥 (삼겹살)"
+  },
+  {
+    "date": "2025-05-17",
+    "type": "expense",
+    "category": "운동",
+    "amount": 70000,
+    "description": "헬스장 월 이용료"
+  },
+  {
+    "date": "2025-05-20",
+    "type": "expense",
+    "category": "카페",
+    "amount": 5300,
+    "description": "투썸 라떼"
+  },
+  {
+    "date": "2025-05-22",
+    "type": "expense",
+    "category": "식비",
+    "amount": 14500,
+    "description": "외식 (버거 + 음료)"
+  },
+  {
+    "date": "2025-05-24",
+    "type": "expense",
+    "category": "문화",
+    "amount": 18000,
+    "description": "영화 '듄2'"
+  },
+  {
+    "date": "2025-05-25",
+    "type": "expense",
+    "category": "구독",
+    "amount": 8900,
+    "description": "유튜브 프리미엄"
+  },
+  {
+    "date": "2025-05-27",
+    "type": "expense",
+    "category": "쇼핑",
+    "amount": 85000,
+    "description": "반팔 셔츠 + 슬랙스"
+  },
+  {
+    "date": "2025-05-30",
+    "type": "expense",
+    "category": "카페",
+    "amount": 4800,
+    "description": "이디야 아이스커피"
+  }
+]
