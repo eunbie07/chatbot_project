@@ -17,7 +17,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       contentType: req.file.mimetype
     });
 
-    const response = await axios.post('http://localhost:3000/stt', form, {
+    const response = await axios.post('http://localhost:3000/fastapi/stt', form, {
       headers: form.getHeaders()
     });
 

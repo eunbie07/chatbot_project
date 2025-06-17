@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const response = await axios.post('http://localhost:3000/log-convo', req.body); // 도커 환경
+    const response = await axios.post('http://localhost:3000/fastapi/log-convo', req.body); // 도커 환경
     res.json(response.data);
   } catch (err) {
     console.error('프록시 /log-convo 오류:', err.message);

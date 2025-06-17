@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const response = await axios.get('http://localhost:3000/logs', { params: req.query });
+    const response = await axios.get('http://localhost:3000/fastapi/logs', { params: req.query });
     res.json(response.data);
   } catch (err) {
     console.error('FastAPI 프록시 오류:', err.message);

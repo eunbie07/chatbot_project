@@ -10,7 +10,7 @@
   <script>
     async function fetchSummary() {
       const userId = document.getElementById("user_id").value;
-      const res = await fetch(`http://localhost:3000/summary/${userId}`);
+      const res = await fetch(`http://localhost:3000/fastapi/summary/${userId}`);
       const data = await res.json();
       document.getElementById("result").textContent = JSON.stringify(data, null, 2);
     }

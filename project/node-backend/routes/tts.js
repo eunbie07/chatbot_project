@@ -5,7 +5,7 @@
 
 // router.post('/', async (req, res) => {
 //   try {
-//     const response = await axios.post('http://localhost:3000/chat-tts', req.body, {
+//     const response = await axios.post('http://localhost:3000/fastapi/chat-tts', req.body, {
 //       responseType: 'arraybuffer', // mp3 바이너리 받기
 //     });
 
@@ -25,7 +25,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const response = await axios.post('http://localhost:3000/tts', req.body, {
+    const response = await axios.post('http://localhost:3000/fastapi/tts', req.body, {
       responseType: 'arraybuffer',
     });
 
