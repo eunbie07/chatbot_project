@@ -1,12 +1,11 @@
-FROM node:20
-
+# 배포용 예시 (추후 요청 시 제공)
+FROM node:20 AS build
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
-
 COPY . .
+RUN npm run build
 
-EXPOSE 5173
-
-CMD ["npm", "run", "dev", "--", "--host"]
+# 정적 파일을 Nginx로 서빙
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html

@@ -113,23 +113,24 @@ jobs:
 
           sleep 5
 
+          echo "Node.js 컨테이너 실행 중..."
           docker run -d --restart always \
             --name node \
             --network app-network \
             -p 8000:8000 \
-            -e FASTAPI_URL=http://fastapi:3000 \
+            -e FASTAPI_URL=http://fastapi:3000/fastapi \
             ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
 
+          echo "프론트엔드 컨테이너 실행 중..."
           docker run -d --restart always \
             --name frontend \
             --network app-network \
             -p 5173:5173 \
             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
 
-          docker ps
           echo "배포 완료!"
 
           echo "서비스 상태 확인..."
-          curl -f http://localhost:3000/health && echo "✅ FastAPI 서비스 정상 (MongoDB 포함)" || echo "❌ FastAPI 서비스 오류"
-          curl -f http://localhost:8000 && echo "✅ Node.js 서비스 정상" || echo "❌ Node.js 서비스 오류"
-          curl -f http://localhost:5173 && echo "✅ Frontend 서비스 정상" || echo "❌ Frontend 서비스 오류"
+          curl -f http://localhost:3000/fastapi/docs && echo "✅ FastAPI OK" || echo "❌ FastAPI 오류"
+          curl -f http://localhost:8000 && echo "✅ Node.js OK" || echo "❌ Node.js 오류"
+          curl -f http://localhost:5173 && echo "✅ Frontend OK" || echo "❌ Frontend 오류"

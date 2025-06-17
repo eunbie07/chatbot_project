@@ -70,7 +70,7 @@ const ChatBot = () => {
 
     try {
       // ✅ 수정: 절대 경로 사용
-      const res = await axios.post("http://13.237.236.117:8000/api/chat", {
+      const res = await axios.post("https://eunbie.site/api/chat", {
         user_id,
         message: prompt,
       });
@@ -84,7 +84,7 @@ const ChatBot = () => {
       ]);
 
       // ✅ 수정: 절대 경로 사용
-      await axios.post("http://13.237.236.117:8000/api/log-convo", {
+      await axios.post("https://eunbie.site/api/log-convo", {
         user_id,
         date: new Date().toISOString().slice(0, 10),
         history: [
@@ -97,7 +97,7 @@ const ChatBot = () => {
       });
 
       // ✅ 수정: 절대 경로 사용
-      const ttsRes = await fetch("http://13.237.236.117:8000/api/tts", {
+      const ttsRes = await fetch("https://eunbie.site/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id, message: reply })
@@ -150,7 +150,7 @@ const ChatBot = () => {
 
         try {
           // ✅ 수정: 절대 경로 사용
-          const res = await axios.post("http://13.237.236.117:8000/api/stt", formData);
+          const res = await axios.post("https://eunbie.site/api/stt", formData);
           setSpending(res.data.text);
         } catch (err) {
           console.error("STT 오류:", err);

@@ -6,7 +6,7 @@ const LogsList = ({ userId = 'user_female' }) => {
 
   useEffect(() => {
     const fetchLogs = async () => {
-      const res = await axios.get(`http://localhost:8000/api/logs?user_id=${userId}`);
+      const res = await axios.get(`https://eunbie.site/api/logs?user_id=${userId}`);
       setLogs(res.data.logs || []);
     };
 
