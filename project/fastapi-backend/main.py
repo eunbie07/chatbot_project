@@ -12,7 +12,7 @@ from app.stt_api import router as stt_router
 from app.coach import router as coach_router
 from app.actual_spending_api import router as actual_spending_router
 
-app = FastAPI(root_path="/fastapi")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
