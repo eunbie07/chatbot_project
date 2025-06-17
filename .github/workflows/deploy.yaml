@@ -58,14 +58,42 @@ jobs:
         username: ${{ env.EC2_USERNAME }}
         key: ${{ env.EC2_KEY }}
         script: |
+          # 최신 이미지 가져오기
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
 
+          # 기존 컨테이너 중지 및 삭제
           docker stop fastapi || true && docker rm fastapi || true
           docker stop node || true && docker rm node || true
           docker stop frontend || true && docker rm frontend || true
 
-          docker run -d --restart always --name fastapi -p 3000:3000 ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
-          docker run -d --restart always --name node -p 8000:8000 ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
-          docker run -d --restart always --name frontend -p 5173:5173 ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+          # .env 파일 생성
+          mkdir -p /home/ubuntu/project/fastapi-backend
+          cat <<EOF > /home/ubuntu/project/fastapi-backend/.env
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          ELEVEN_API_KEY=${{ secrets.ELEVEN_API_KEY }}
+          ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+          AWS_REGION=ap-southeast-2
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          EOF
+
+          # 컨테이너 실행
+          docker run -d --restart always \
+            --name fastapi \
+            -p 3000:3000 \
+            --env-file /home/ubuntu/project/fastapi-backend/.env \
+            ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+
+          docker run -d --restart always \
+            --name node \
+            -p 8000:8000 \
+            ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+
+          docker run -d --restart always \
+            --name frontend \
+            -p 5173:5173 \
+            ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
