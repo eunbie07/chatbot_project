@@ -62,12 +62,17 @@ jobs:
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
-
+          
           # 기존 컨테이너 중지 및 삭제
-          docker stop fastapi || true && docker rm fastapi || true
-          docker stop node || true && docker rm node || true
-          docker stop frontend || true && docker rm frontend || true
-
+          docker stop fastapi node frontend mongodb || true
+          docker rm fastapi node frontend mongodb || true
+          
+          # 네트워크가 없으면 생성
+          docker network create app-network || true
+          
+          # MongoDB 데이터 볼륨 생성
+          docker volume create mongodb_data || true
+          
           # .env 파일 생성
           mkdir -p /home/ubuntu/project/fastapi-backend
           cat <<EOF > /home/ubuntu/project/fastapi-backend/.env
@@ -78,22 +83,57 @@ jobs:
           AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
           AWS_REGION=ap-southeast-2
-          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          MONGODB_URI=mongodb://mongodb:27017
           EOF
-
-          # 컨테이너 실행
+          
+          # MongoDB 컨테이너 실행
+          docker run -d --restart always \
+            --name mongodb \
+            --network app-network \
+            -p 27017:27017 \
+            -v mongodb_data:/data/db \
+            mongo:latest
+          
+          # MongoDB 시작 대기
+          echo "MongoDB 시작 대기 중..."
+          sleep 10
+          
+          # FastAPI 컨테이너 실행
           docker run -d --restart always \
             --name fastapi \
+            --network app-network \
             -p 3000:3000 \
             --env-file /home/ubuntu/project/fastapi-backend/.env \
+            --depends-on mongodb \
             ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
-
+          
+          # Node.js 컨테이너 실행
           docker run -d --restart always \
             --name node \
+            --network app-network \
             -p 8000:8000 \
+            -e FASTAPI_URL=http://fastapi:3000 \
             ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
-
+          
+          # Frontend 컨테이너 실행
           docker run -d --restart always \
             --name frontend \
+            --network app-network \
             -p 5173:5173 \
             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+          
+          # 컨테이너 상태 확인
+          docker ps
+          echo "배포 완료!"
+          
+          # MongoDB 연결 테스트
+          echo "MongoDB 연결 테스트..."
+          docker exec fastapi python -c "
+          import pymongo
+          try:
+              client = pymongo.MongoClient('mongodb://mongodb:27017')
+              client.server_info()
+              print('✅ MongoDB 연결 성공')
+          except Exception as e:
+              print(f'❌ MongoDB 연결 실패: {e}')
+          "

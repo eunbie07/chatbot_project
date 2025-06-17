@@ -1,18 +1,16 @@
-// node-backend/routes/actuals.js
-
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
 router.get('/:userId', async (req, res) => {
-  const { userId } = req.params;
-
   try {
-    const response = await axios.get(`http://localhost:3000/fastapi/actuals/${userId}`);
+    const fastApiUrl = process.env.FASTAPI_URL || 'http://localhost:3000';
+    const { userId } = req.params;
+    const response = await axios.get(`${fastApiUrl}/fastapi/actuals/${userId}`);
     res.json(response.data);
-  } catch (error) {
-    console.error('FastAPI 연동 오류:', error.message);
-    res.status(500).json({ error: 'FastAPI에서 데이터를 가져오는 중 오류 발생' });
+  } catch (err) {
+    console.error('프록시 오류:', err.message);
+    res.status(500).json({ error: 'FastAPI 서버 응답 실패' });
   }
 });
 

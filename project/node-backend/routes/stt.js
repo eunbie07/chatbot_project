@@ -2,6 +2,8 @@ const express = require('express');
 const axios = require('axios');
 const multer = require('multer');
 const FormData = require('form-data');
+
+const fastApiUrl = process.env.FASTAPI_URL || "http://localhost:3000";
 const fs = require('fs');
 
 const router = express.Router();
@@ -17,7 +19,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       contentType: req.file.mimetype
     });
 
-    const response = await axios.post('http://localhost:3000/fastapi/stt', form, {
+    const response = await axios.post('${fastApiUrl}/fastapi/stt', form, {
       headers: form.getHeaders()
     });
 
