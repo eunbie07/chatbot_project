@@ -8,7 +8,7 @@ router.post('/', async (req, res) => {
     console.log('🔵 FastAPI URL:', fastApiUrl);
     console.log('🟣 /api/tts 요청 도착:', req.body);
     
-    const response = await axios.post(`${fastApiUrl}/fastapi/tts`, req.body, {
+    const response = await axios.post(`${fastApiUrl}/tts`, req.body, {
       responseType: 'arraybuffer',
     });
 
