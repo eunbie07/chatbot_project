@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     host: true,           // 외부 접근 허용
     port: 5173,           // 기본 포트
+    cors: true,
     watch: {
       usePolling: true    // 도커 환경에서는 polling 감지 필요
     },
