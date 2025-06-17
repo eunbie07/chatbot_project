@@ -1,4 +1,4 @@
-# 배포용 예시 (추후 요청 시 제공)
+# 배포용 예시 (추후 요청 시 제공)/ Dockerfile
 FROM node:20 AS build
 WORKDIR /app
 COPY package*.json ./
