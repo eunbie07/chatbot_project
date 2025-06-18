@@ -1,3 +1,4 @@
+// 변경된 ChatBot.jsx
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
@@ -25,7 +26,7 @@ const ChatBot = () => {
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [lastAudioUrl, setLastAudioUrl] = useState(null);
+  const [s3Key, setS3Key] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
@@ -93,24 +94,29 @@ const ChatBot = () => {
         ]
       });
 
-      const ttsRes = await axios.post("https://eunbie.site/api/tts", {
+      const ttsRes = await axios.post("https://eunbie.site/api/tts_upload", {
         user_id,
-        message: reply,
-        return_type: "url"
+        message: reply
       });
 
-      const audioUrl = ttsRes.data.url;
-      setLastAudioUrl(audioUrl);
+      setS3Key(ttsRes.data.s3_key);
 
+      // 다시듣기용 presigned URL 요청
+      const replayRes = await axios.post("https://eunbie.site/api/tts_replay", {
+        s3_key: ttsRes.data.s3_key
+      });
+
+      const audioUrl = replayRes.data.url;
       const audio = new Audio(audioUrl);
       setIsSpeaking(true);
       audio.onended = () => setIsSpeaking(false);
       audio.onerror = () => {
-        console.error("오디오 재생 오류");
+        console.error("TTS 음성 재생 오류");
         alert("음성을 재생할 수 없습니다.");
         setIsSpeaking(false);
       };
       audio.play();
+
     } catch (err) {
       console.error("GPT 오류:", err);
       setHistory((prev) => [
@@ -129,7 +135,7 @@ const ChatBot = () => {
     setRecommendation('');
     setHistory([{ role: 'bot', content: "오늘 어떤 소비를 하셨나요?", time: getTime() }]);
     setStep(1);
-    setLastAudioUrl(null);
+    setS3Key(null);
   };
 
   useEffect(() => {
@@ -171,17 +177,25 @@ const ChatBot = () => {
     setIsRecording(false);
   };
 
-  const handleReplay = () => {
-    if (lastAudioUrl) {
-      const audio = new Audio(lastAudioUrl);
+  const handleReplay = async () => {
+    if (!s3Key) return;
+    try {
+      const res = await axios.post("https://eunbie.site/api/tts_replay", {
+        s3_key: s3Key
+      });
+      const audioUrl = res.data.url;
+      const audio = new Audio(audioUrl);
       setIsSpeaking(true);
       audio.onended = () => setIsSpeaking(false);
       audio.onerror = () => {
-        console.error("다시듣기 오류");
+        console.error("다시듣기 음성 오류");
         alert("다시듣기 음성을 재생할 수 없습니다.");
         setIsSpeaking(false);
       };
       audio.play();
+    } catch (err) {
+      console.error("재생용 presigned URL 요청 실패:", err);
+      alert("다시듣기 요청에 실패했습니다.");
     }
   };
 
@@ -252,7 +266,7 @@ const ChatBot = () => {
       {step === 4 && recommendation && (
         <InputArea>
           <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
-          <Button onClick={handleReplay} disabled={!lastAudioUrl || loading}>다시 듣기</Button>
+          <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
         </InputArea>
       )}
     </ChatContainer>
