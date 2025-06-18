@@ -25,7 +25,7 @@ const ChatBot = () => {
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [lastAudioUrl, setLastAudioUrl] = useState(null); // ✅ 추가
+  const [lastAudioUrl, setLastAudioUrl] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
@@ -95,15 +95,22 @@ const ChatBot = () => {
 
       const ttsRes = await axios.post("https://eunbie.site/api/tts", {
         user_id,
-        message: reply
+        message: reply,
+        return_type: "url"
       });
 
       const audioUrl = ttsRes.data.url;
-      setLastAudioUrl(audioUrl); // ✅ 저장
+      setLastAudioUrl(audioUrl);
+
       const audio = new Audio(audioUrl);
       setIsSpeaking(true);
-      audio.play();
       audio.onended = () => setIsSpeaking(false);
+      audio.onerror = () => {
+        console.error("오디오 재생 오류");
+        alert("음성을 재생할 수 없습니다.");
+        setIsSpeaking(false);
+      };
+      audio.play();
     } catch (err) {
       console.error("GPT 오류:", err);
       setHistory((prev) => [
@@ -122,7 +129,7 @@ const ChatBot = () => {
     setRecommendation('');
     setHistory([{ role: 'bot', content: "오늘 어떤 소비를 하셨나요?", time: getTime() }]);
     setStep(1);
-    setLastAudioUrl(null); // ✅ 초기화
+    setLastAudioUrl(null);
   };
 
   useEffect(() => {
@@ -168,8 +175,13 @@ const ChatBot = () => {
     if (lastAudioUrl) {
       const audio = new Audio(lastAudioUrl);
       setIsSpeaking(true);
-      audio.play();
       audio.onended = () => setIsSpeaking(false);
+      audio.onerror = () => {
+        console.error("다시듣기 오류");
+        alert("다시듣기 음성을 재생할 수 없습니다.");
+        setIsSpeaking(false);
+      };
+      audio.play();
     }
   };
 
