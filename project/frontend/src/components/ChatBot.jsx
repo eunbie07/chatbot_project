@@ -1,5 +1,3 @@
-// 📍 ChatBot.jsx (STT: 실시간 녹음 → Whisper 전송)
-
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
@@ -27,6 +25,7 @@ const ChatBot = () => {
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [lastAudioUrl, setLastAudioUrl] = useState(null); // ✅ 추가
 
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
@@ -69,7 +68,6 @@ const ChatBot = () => {
     addMessage('bot', null);
 
     try {
-      // ✅ 수정: 절대 경로 사용
       const res = await axios.post("https://eunbie.site/api/chat", {
         user_id,
         message: prompt,
@@ -83,7 +81,6 @@ const ChatBot = () => {
         { role: 'bot', content: reply, time: getTime() }
       ]);
 
-      // ✅ 수정: 절대 경로 사용
       await axios.post("https://eunbie.site/api/log-convo", {
         user_id,
         date: new Date().toISOString().slice(0, 10),
@@ -96,19 +93,17 @@ const ChatBot = () => {
         ]
       });
 
-      // ✅ 수정: 절대 경로 사용
-      const ttsRes = await fetch("https://eunbie.site/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, message: reply })
+      const ttsRes = await axios.post("https://eunbie.site/api/tts", {
+        user_id,
+        message: reply
       });
 
-      const blob = await ttsRes.blob();
-      const audio = new Audio(URL.createObjectURL(blob));
+      const audioUrl = ttsRes.data.url;
+      setLastAudioUrl(audioUrl); // ✅ 저장
+      const audio = new Audio(audioUrl);
       setIsSpeaking(true);
       audio.play();
       audio.onended = () => setIsSpeaking(false);
-
     } catch (err) {
       console.error("GPT 오류:", err);
       setHistory((prev) => [
@@ -127,6 +122,7 @@ const ChatBot = () => {
     setRecommendation('');
     setHistory([{ role: 'bot', content: "오늘 어떤 소비를 하셨나요?", time: getTime() }]);
     setStep(1);
+    setLastAudioUrl(null); // ✅ 초기화
   };
 
   useEffect(() => {
@@ -149,7 +145,6 @@ const ChatBot = () => {
         formData.append('file', blob, 'recording.webm');
 
         try {
-          // ✅ 수정: 절대 경로 사용
           const res = await axios.post("https://eunbie.site/api/stt", formData);
           setSpending(res.data.text);
         } catch (err) {
@@ -167,6 +162,15 @@ const ChatBot = () => {
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
     setIsRecording(false);
+  };
+
+  const handleReplay = () => {
+    if (lastAudioUrl) {
+      const audio = new Audio(lastAudioUrl);
+      setIsSpeaking(true);
+      audio.play();
+      audio.onended = () => setIsSpeaking(false);
+    }
   };
 
   return (
@@ -236,6 +240,7 @@ const ChatBot = () => {
       {step === 4 && recommendation && (
         <InputArea>
           <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
+          <Button onClick={handleReplay} disabled={!lastAudioUrl || loading}>다시 듣기</Button>
         </InputArea>
       )}
     </ChatContainer>
