@@ -102,7 +102,7 @@ const ChatBot = () => {
       });
 
       const blob = await streamRes.blob();
-      const audioStream = new Audio(URL.createObjectURL(blob));
+      const audioStream = new Audio(URL.createObjectURL(blob));a
       setIsSpeaking(true);
       audioStream.play();
       audioStream.onended = () => setIsSpeaking(false);
