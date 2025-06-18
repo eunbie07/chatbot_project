@@ -128,7 +128,6 @@ jobs:
           docker run -d --restart always \
             --name frontend \
             --network app-network \
-            -p 80:80 \
             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
 
           docker compose -f /root/reverse-proxy/docker-compose.yml restart nginx
