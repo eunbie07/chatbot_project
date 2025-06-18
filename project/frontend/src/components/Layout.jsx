@@ -35,7 +35,9 @@ const Layout = ({ left, center, right }) => {
               <Link to="/analysis" style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}>Analysis</Link>
             </li>
             <li>
-              <Link to="/chat" style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}>Chat</Link>
+              <a href="https://oddly-proven-swan.ngrok-free.app/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}>
+                Analysis
+              </a>  
             </li>
             <li>
               <Link to="/diary" style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}>Diary</Link>
