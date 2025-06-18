@@ -30,7 +30,7 @@ app.include_router(log_router)
 app.include_router(logs_router)
 app.include_router(convo_log_router)
 app.include_router(tts_router)  # ✅ 추가
-app.include_router(tts_reply_router)
+app.include_router(tts_replay_router)
 app.include_router(tts_upload_router)
 app.include_router(chat_tts_router)
 app.include_router(stt_router)
