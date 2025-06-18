@@ -127,7 +127,7 @@ jobs:
           docker run -d --restart always \
             --name frontend \
             --network app-network \
-            -p 5173:5173 \
+            -p 80:80 \
             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
 
           echo "배포 완료!"
@@ -135,4 +135,4 @@ jobs:
           echo "서비스 상태 확인..."
           curl -f http://localhost:3000/fastapi/docs && echo "✅ FastAPI OK" || echo "❌ FastAPI 오류"
           curl -f http://localhost:8000 && echo "✅ Node.js OK" || echo "❌ Node.js 오류"
-          curl -f http://localhost:5173 && echo "✅ Frontend OK" || echo "❌ Frontend 오류"
+          curl -f http://localhost && echo "✅ Frontend OK" || echo "❌ Frontend 오류"
