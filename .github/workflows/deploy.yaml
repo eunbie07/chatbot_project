@@ -90,7 +90,7 @@ jobs:
             -v mongodb_data:/data/db \
             mongo:latest \
             --bind_ip_all \
-            --logpath /var/log/mongodb.log
+
 
           success=false
           for i in {1..30}; do
