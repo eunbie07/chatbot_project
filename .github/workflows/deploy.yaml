@@ -43,7 +43,7 @@ jobs:
         push: true
         tags: ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
 
-    - name: Build and Push Frontend (with cache busting)
+    - name: Build and Push Frontend
       uses: docker/build-push-action@v5
       with:
         context: ./project/frontend
@@ -53,18 +53,14 @@ jobs:
         build-args: |
           CACHEBUSTER=${{ github.run_number }}
 
-    - name: Deploy to EC2 via SSH
+    - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
         host: ${{ env.EC2_HOST }}
         username: ${{ env.EC2_USERNAME }}
         key: ${{ env.EC2_KEY }}
         script: |
-          echo "디스크 공간 정리 중..."
           docker system prune -f
-          docker volume prune -f
-          docker image prune -a -f
-
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
@@ -75,8 +71,8 @@ jobs:
           docker network create app-network || true
           docker volume create mongodb_data || true
 
-          mkdir -p /home/ubuntu/project/fastapi-backend
-          cat <<EOF > /home/ubuntu/project/fastapi-backend/.env
+          mkdir -p /root/project/fastapi-backend
+          cat <<EOF > /root/project/fastapi-backend/.env
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           ELEVEN_API_KEY=${{ secrets.ELEVEN_API_KEY }}
           ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
@@ -87,35 +83,41 @@ jobs:
           MONGODB_URI=mongodb://mongodb:27017
           EOF
 
-          echo "MongoDB 컨테이너 실행 중..."
           docker run -d --restart always \
             --name mongodb \
             --network app-network \
             -p 27017:27017 \
             -v mongodb_data:/data/db \
-            mongo:latest
+            mongo:latest \
+            --bind_ip_all \
+            --logpath /var/log/mongodb.log
 
-          echo "MongoDB 시작 대기 중..."
+          success=false
           for i in {1..30}; do
             if docker exec mongodb mongosh --eval "db.runCommand('ping')" >/dev/null 2>&1; then
               echo "✅ MongoDB 준비 완료"
+              success=true
               break
             fi
             echo "MongoDB 대기 중... ($i/30)"
             sleep 2
           done
 
-          echo "FastAPI 컨테이너 실행 중..."
+          if [ "$success" = false ]; then
+            echo "❌ MongoDB가 시작되지 않았습니다."
+            docker logs mongodb
+            exit 1
+          fi
+
           docker run -d --restart always \
             --name fastapi \
             --network app-network \
             -p 3000:3000 \
-            --env-file /home/ubuntu/project/fastapi-backend/.env \
+            --env-file /root/project/fastapi-backend/.env \
             ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
 
           sleep 5
 
-          echo "Node.js 컨테이너 실행 중..."
           docker run -d --restart always \
             --name node \
             --network app-network \
@@ -123,16 +125,12 @@ jobs:
             -e FASTAPI_URL=http://fastapi:3000/fastapi \
             ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
 
-          echo "프론트엔드 컨테이너 실행 중..."
           docker run -d --restart always \
             --name frontend \
             --network app-network \
             -p 80:80 \
             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
 
-          echo "배포 완료!"
+          docker compose -f /root/reverse-proxy/docker-compose.yml restart nginx
 
-          echo "서비스 상태 확인..."
-          curl -f http://localhost:3000/fastapi/docs && echo "✅ FastAPI OK" || echo "❌ FastAPI 오류"
-          curl -f http://localhost:8000 && echo "✅ Node.js OK" || echo "❌ Node.js 오류"
-          curl -f http://localhost && echo "✅ Frontend OK" || echo "❌ Frontend 오류"
+          echo "✅ 전체 배포 완료"
