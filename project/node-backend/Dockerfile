@@ -2,7 +2,8 @@
 
 # --- 1단계: 빌드 스테이지 ---
 # 패키지 설치 및 빌드(필요시)를 위한 환경
-FROM node:20-slim AS builder # 빌드 스테이지에서는 'slim' 버전도 충분
+FROM node:20-slim AS builder 
+# 빌드 스테이지에서는 'slim' 버전도 충분 (이 주석을 다음 줄로 내렸습니다)
 
 WORKDIR /app
 
@@ -21,7 +22,8 @@ COPY . .
 # --- 2단계: 런타임 스테이지 ---
 # 최종 애플리케이션 실행을 위한 최소한의 환경
 # 여기서는 더 작고 보안에 강한 'alpine' 버전을 사용하는 것이 일반적
-FROM node:20-alpine # 또는 node:20-slim
+FROM node:20-alpine 
+# 또는 node:20-slim (이 주석을 다음 줄로 내렸습니다)
 
 WORKDIR /app
 
