@@ -1,4 +1,3 @@
-// ✅ 수정된 ChatBot.jsx (Streaming + S3 Upload + Replay)
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
@@ -102,7 +101,7 @@ const ChatBot = () => {
       });
 
       const blob = await streamRes.blob();
-      const audioStream = new Audio(URL.createObjectURL(blob));a
+      const audioStream = new Audio(URL.createObjectURL(blob));
       setIsSpeaking(true);
       audioStream.play();
       audioStream.onended = () => setIsSpeaking(false);
@@ -120,10 +119,10 @@ const ChatBot = () => {
       setS3Key(uploadRes.data.s3_key);
 
     } catch (err) {
-      console.error("GPT 오류:", err);
+      console.error("GPT 오류 또는 업로드 오류:", err);
       setHistory((prev) => [
         ...prev.slice(0, -1),
-        { role: 'bot', content: "GPT 응답 오류가 발생했어요.", time: getTime() }
+        { role: 'bot', content: "GPT 응답 또는 업로드 중 오류가 발생했어요.", time: getTime() }
       ]);
     }
 
@@ -199,6 +198,25 @@ const ChatBot = () => {
     }
   };
 
+  const handleTestUpload = async () => {
+    const testMessage = "테스트 업로드용 음성입니다.";
+    try {
+      console.log("🛰️ 업로드 테스트 시작");
+
+      const res = await axios.post("https://eunbie.site/api/tts_upload", {
+        user_id,
+        message: testMessage
+      });
+
+      console.log("✅ 업로드 성공:", res.data);
+      alert("업로드 성공!\n" + res.data.url);
+      setS3Key(res.data.s3_key);
+    } catch (err) {
+      console.error("❌ 업로드 실패:", err);
+      alert("업로드 실패: " + (err?.response?.data?.detail || err.message));
+    }
+  };
+
   return (
     <ChatContainer>
       <ChatHeader>감정 소비 반성 챗봇</ChatHeader>
@@ -267,6 +285,7 @@ const ChatBot = () => {
         <InputArea>
           <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
           <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
+          <Button onClick={handleTestUpload} disabled={loading}>업로드 테스트</Button>
         </InputArea>
       )}
     </ChatContainer>
