@@ -1,9 +1,11 @@
-node_modules
-.git
-*.log
-tests
-Dockerfile
-.dockerignore
-README.md
-.vscode
+node_modules/
+.git/
+.gitignore
+npm-debug.log
 .env
+Dockerfile
+README.md
+# 개발 환경에서만 필요한 파일/폴더들
+# 예를 들어, 테스트 파일이나 문서 폴더 등
+# tests/
+# docs/
