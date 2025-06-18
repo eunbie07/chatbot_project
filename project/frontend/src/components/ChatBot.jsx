@@ -93,7 +93,6 @@ const ChatBot = () => {
         ]
       });
 
-      // ✅ 1. 스트리밍으로 즉시 들려줌
       const streamRes = await fetch("https://eunbie.site/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -110,7 +109,6 @@ const ChatBot = () => {
         setIsSpeaking(false);
       };
 
-      // ✅ 2. 업로드용으로 S3 저장
       const uploadRes = await axios.post("https://eunbie.site/api/tts_upload", {
         user_id,
         message: reply
@@ -119,7 +117,7 @@ const ChatBot = () => {
       setS3Key(uploadRes.data.s3_key);
 
     } catch (err) {
-      console.error("GPT 오류 또는 업로드 오류:", err);
+      console.error("GPT 또는 업로드 오류:", err);
       setHistory((prev) => [
         ...prev.slice(0, -1),
         { role: 'bot', content: "GPT 응답 또는 업로드 중 오류가 발생했어요.", time: getTime() }
@@ -281,12 +279,16 @@ const ChatBot = () => {
         </InputArea>
       )}
 
-      {step === 4 && recommendation && (
-        <InputArea>
-          <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
-          <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
-          <Button onClick={handleTestUpload} disabled={loading}>업로드 테스트</Button>
-        </InputArea>
+      {step === 4 && (
+        <>
+          <InputArea>
+            <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
+            <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
+          </InputArea>
+          <InputArea>
+            <Button onClick={handleTestUpload} disabled={loading}>🛰️ 업로드 테스트</Button>
+          </InputArea>
+        </>
       )}
     </ChatContainer>
   );
