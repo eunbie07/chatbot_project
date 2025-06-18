@@ -31,14 +31,12 @@ const Layout = ({ left, center, right }) => {
               <Link to="/" style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}>Home</Link>
             </li>
             <li>
-              <a
-                href="https://oddly-proven-swan.ngrok-free.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}
+              <span
+                onClick={() => window.location.href = 'https://oddly-proven-swan.ngrok-free.app/'}
+                style={{ cursor: 'pointer', fontSize: '20px', color: '#666', textDecoration: 'none' }}
               >
                 Analysis
-              </a>
+              </span>
             </li>
             <li>
               <Link to="/chat" style={{ textDecoration: 'none', fontSize: '20px', color: '#666' }}>Chat</Link>

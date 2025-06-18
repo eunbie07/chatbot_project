@@ -258,7 +258,12 @@ const ChatBot = () => {
             onClick={isRecording ? stopRecording : startRecording}
             disabled={loading}
           >
-            {isRecording ? "🛑 멈추기" : "🎙️ 녹음하기"}
+            {isRecording ? "🛑 멈추기" : "🎙️ 마이크"}
+          </Button>
+
+          {/* ✅ 항상 노출되는 테스트 버튼 */}
+          <Button onClick={handleTestUpload} disabled={loading}>
+            🛰️ 업로드 테스트
           </Button>
         </InputArea>
       )}
@@ -279,16 +284,11 @@ const ChatBot = () => {
         </InputArea>
       )}
 
-      {step === 4 && (
-        <>
-          <InputArea>
-            <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
-            <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
-          </InputArea>
-          <InputArea>
-            <Button onClick={handleTestUpload} disabled={loading}>🛰️ 업로드 테스트</Button>
-          </InputArea>
-        </>
+      {step === 4 && recommendation && (
+        <InputArea>
+          <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
+          <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
+        </InputArea>
       )}
     </ChatContainer>
   );
