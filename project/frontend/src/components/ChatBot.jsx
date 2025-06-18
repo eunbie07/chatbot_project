@@ -1,4 +1,4 @@
-// 변경된 ChatBot.jsx
+// ✅ 수정된 ChatBot.jsx (Streaming + S3 Upload + Replay)
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
@@ -94,28 +94,30 @@ const ChatBot = () => {
         ]
       });
 
-      const ttsRes = await axios.post("https://eunbie.site/api/tts_upload", {
+      // ✅ 1. 스트리밍으로 즉시 들려줌
+      const streamRes = await fetch("https://eunbie.site/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id, message: reply })
+      });
+
+      const blob = await streamRes.blob();
+      const audioStream = new Audio(URL.createObjectURL(blob));
+      setIsSpeaking(true);
+      audioStream.play();
+      audioStream.onended = () => setIsSpeaking(false);
+      audioStream.onerror = () => {
+        alert("음성을 재생할 수 없습니다.");
+        setIsSpeaking(false);
+      };
+
+      // ✅ 2. 업로드용으로 S3 저장
+      const uploadRes = await axios.post("https://eunbie.site/api/tts_upload", {
         user_id,
         message: reply
       });
 
-      setS3Key(ttsRes.data.s3_key);
-
-      // 다시듣기용 presigned URL 요청
-      const replayRes = await axios.post("https://eunbie.site/api/tts_replay", {
-        s3_key: ttsRes.data.s3_key
-      });
-
-      const audioUrl = replayRes.data.url;
-      const audio = new Audio(audioUrl);
-      setIsSpeaking(true);
-      audio.onended = () => setIsSpeaking(false);
-      audio.onerror = () => {
-        console.error("TTS 음성 재생 오류");
-        alert("음성을 재생할 수 없습니다.");
-        setIsSpeaking(false);
-      };
-      audio.play();
+      setS3Key(uploadRes.data.s3_key);
 
     } catch (err) {
       console.error("GPT 오류:", err);
@@ -188,13 +190,11 @@ const ChatBot = () => {
       setIsSpeaking(true);
       audio.onended = () => setIsSpeaking(false);
       audio.onerror = () => {
-        console.error("다시듣기 음성 오류");
         alert("다시듣기 음성을 재생할 수 없습니다.");
         setIsSpeaking(false);
       };
       audio.play();
     } catch (err) {
-      console.error("재생용 presigned URL 요청 실패:", err);
       alert("다시듣기 요청에 실패했습니다.");
     }
   };
