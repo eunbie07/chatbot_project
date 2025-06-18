@@ -43,13 +43,15 @@ jobs:
         push: true
         tags: ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
 
-    - name: Build and Push Frontend
+    - name: Build and Push Frontend (with cache busting)
       uses: docker/build-push-action@v5
       with:
         context: ./project/frontend
         file: ./project/frontend/Dockerfile
         push: true
         tags: ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+        build-args: |
+          CACHEBUSTER=${{ github.run_number }}
 
     - name: Deploy to EC2 via SSH
       uses: appleboy/ssh-action@master
