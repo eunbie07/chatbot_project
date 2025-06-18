@@ -57,7 +57,7 @@ VOICE_ID = "uyVNoMrnUku1dZyVEXwD"
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")  # ✅ 이름 확인
 
 s3_client = boto3.client(
     "s3",
@@ -88,23 +88,26 @@ def tts(req: TTSRequest):
     }
 
     try:
-        # 1. ElevenLabs TTS 생성
+        # 1. ElevenLabs TTS 요청
         r = requests.post(f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
                           headers=headers, json=payload)
         if r.status_code != 200:
             raise Exception(r.text)
 
-        # 2. 파일명 생성
+        # 2. S3에 업로드
         filename = f"{req.user_id}_{uuid.uuid4().hex}.mp3"
         s3_key = f"tts_audio/{filename}"
+        s3_client.upload_fileobj(
+            BytesIO(r.content),
+            S3_BUCKET_NAME,
+            s3_key,
+            ExtraArgs={'ContentType': 'audio/mpeg'}
+        )
 
-        # 3. S3 업로드
-        s3_client.upload_fileobj(BytesIO(r.content), S3_BUCKET_NAME, s3_key)
-
-        # 4. S3 URL 생성 (퍼블릭일 경우 바로 URL 접근 가능)
+        # 3. S3 접근 URL 반환 (버킷 public 가정)
         s3_url = f"https://{S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com/{s3_key}"
-
         return JSONResponse({"url": s3_url})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"TTS 생성 실패: {str(e)}")
+
