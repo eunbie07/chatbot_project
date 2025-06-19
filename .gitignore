@@ -85,3 +85,5 @@ test/project/mongosh-2.0.2-linux-x64/
 **/node_modules
 **/package-lock.json
 **/.serverless
+
+**/secret.yaml

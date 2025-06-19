@@ -15,7 +15,7 @@ VOICE_ID = os.getenv("VOICE_ID", "uyVNoMrnUku1dZyVEXwD")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
-S3_REGION = os.getenv("S3_REGION", "ap-northeast-2")
+S3_REGION = os.getenv("S3_REGION", "ap-southeast-2")
 
 # S3 클라이언트 생성
 s3_client = boto3.client(

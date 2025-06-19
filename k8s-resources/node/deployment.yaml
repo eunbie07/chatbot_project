@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-backend
+  template:
+    metadata:
+      labels:
+        app: node-backend
+    spec:
+      containers:
+        - name: node-backend
+          image: eunbie/node-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:                                  # ✅ 여기에 추가
+            - name: FASTAPI_URL
+              value: http://10.107.28.233:3000

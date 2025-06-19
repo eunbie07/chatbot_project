@@ -64,7 +64,7 @@ def tts(req: TTSRequest):
 #     "s3",
 #     aws_access_key_id=AWS_ACCESS_KEY_ID,
 #     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-#     region_name="ap-northeast-2"
+#     region_name="ap-southeast-2"
 # )
 
 # # 요청 바디 정의
