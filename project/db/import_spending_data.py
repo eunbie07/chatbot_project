@@ -3,7 +3,7 @@ import json
 import os
 
 # MongoDB 연결
-client = MongoClient("mongodb://localhost:27017")
+client = MongoClient("mongodb://localhost:32017")
 db = client["spending_db"]
 collection = db["spending_logs"]
 
@@ -33,3 +33,5 @@ for entry in files:
     print(f"{entry['filename']} → MongoDB 삽입 완료")
 
 print("모든 JSON 파일 삽입 완료.")
+print(db.list_collection_names())
+

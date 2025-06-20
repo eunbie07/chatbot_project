@@ -6,7 +6,7 @@ router.get('/:userId', async (req, res) => {
   try {
     const fastApiUrl = process.env.FASTAPI_URL || 'http://localhost:3000';
     const { userId } = req.params;
-    const response = await axios.get(`${fastApiUrl}/fastapi/actuals/${userId}`);
+    const response = await axios.get(`${fastApiUrl}/actuals/${userId}`);
     res.json(response.data);
   } catch (err) {
     console.error('프록시 오류:', err.message);

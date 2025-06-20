@@ -12,8 +12,12 @@ router = APIRouter()
 # OpenAI API 클라이언트 설정
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# MongoDB 연결 (외부 IP 사용 시 방화벽 허용 여부 확인)
-mongo = MongoClient("mongodb://13.237.236.117:27017")
+
+
+mongo_uri = os.getenv("MONGODB_URI", "mongodb://mongodb.default.svc.cluster.local:27017")
+print(f"DEBUG: MongoDB URI used: {mongo_uri}")
+mongo = MongoClient(mongo_uri)
+
 collection = mongo.spending_db.spending_logs
 
 @router.get("/coach/{user_id}")

@@ -9,4 +9,5 @@ spec:
   - protocol: TCP
     port: 27017
     targetPort: 27017
-  type: ClusterIP
+    nodePort: 32017  # 외부에서 접근할 포트
+  type: NodePort

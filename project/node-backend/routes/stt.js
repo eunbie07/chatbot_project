@@ -2,9 +2,9 @@ const express = require('express');
 const axios = require('axios');
 const multer = require('multer');
 const FormData = require('form-data');
+const fs = require('fs');
 
 const fastApiUrl = process.env.FASTAPI_URL || "http://localhost:3000";
-const fs = require('fs');
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // 임시 저장 폴더
@@ -19,7 +19,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       contentType: req.file.mimetype
     });
 
-    const response = await axios.post('${fastApiUrl}/fastapi/stt', form, {
+    const response = await axios.post(`${fastApiUrl}/stt`, form, {
       headers: form.getHeaders()
     });
 

@@ -27,6 +27,8 @@ const ChatBot = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [s3Key, setS3Key] = useState(null);
 
+  const [userInputs, setUserInputs] = useState({ spending: '', emotion: '', effect: '' });
+
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
 
@@ -38,14 +40,18 @@ const ChatBot = () => {
   };
 
   const handleSubmitSpending = () => {
-    if (!spending.trim()) return;
-    addMessage('user', spending);
+    const trimmed = spending.trim();
+    if (!trimmed) return;
+
+    setUserInputs(prev => ({ ...prev, spending: trimmed }));
+    addMessage('user', trimmed);
     addMessage('bot', "그 소비를 하신 이유나 기분은 어땠나요?");
     setSpending('');
     setStep(2);
   };
 
   const handleSelectEmotion = (e) => {
+    setUserInputs(prev => ({ ...prev, emotion: e }));
     addMessage('user', e);
     setEmotion(e);
     addMessage('bot', "그 소비 이후 기분은 어땠나요?");
@@ -53,13 +59,20 @@ const ChatBot = () => {
   };
 
   const handleSelectEffect = async (e) => {
+    setUserInputs(prev => ({ ...prev, effect: e }));
     addMessage('user', e);
     setEffect(e);
     setStep(4);
 
+    const currentInputs = {
+      spending: userInputs.spending,
+      emotion: userInputs.emotion,
+      effect: e
+    };
+
     const prompt = `
-      사용자가 '${spending}'라는 소비를 했고,
-      그 이유는 '${emotion}' 때문이었어요.
+      사용자가 '${currentInputs.spending}'라는 소비를 했고,
+      그 이유는 '${currentInputs.emotion}' 때문이었어요.
       하지만 그 소비 후 감정은 '${e}'였어요.
       이 사용자가 다음엔 감정을 더 건강하게 해소할 수 있도록 따뜻하게 조언해줘.
     `;
@@ -81,16 +94,18 @@ const ChatBot = () => {
         { role: 'bot', content: reply, time: getTime() }
       ]);
 
+      const convoHistory = [
+        { role: "system", content: "4단계 감정 소비 반성 대화" },
+        { role: "user", content: currentInputs.spending },
+        { role: "user", content: currentInputs.emotion },
+        { role: "user", content: currentInputs.effect },
+        { role: "gpt", content: reply }
+      ].filter(item => item.content && item.content.trim() !== "");
+
       await axios.post("https://eunbie.site/api/log-convo", {
         user_id,
         date: new Date().toISOString().slice(0, 10),
-        history: [
-          { role: "system", content: "4단계 감정 소비 반성 대화" },
-          { role: "user", content: spending },
-          { role: "user", content: emotion },
-          { role: "user", content: e },
-          { role: "gpt", content: reply }
-        ]
+        history: convoHistory
       });
 
       const streamRes = await fetch("https://eunbie.site/api/tts", {
@@ -135,6 +150,7 @@ const ChatBot = () => {
     setHistory([{ role: 'bot', content: "오늘 어떤 소비를 하셨나요?", time: getTime() }]);
     setStep(1);
     setS3Key(null);
+    setUserInputs({ spending: '', emotion: '', effect: '' });
   };
 
   useEffect(() => {
@@ -158,7 +174,12 @@ const ChatBot = () => {
 
         try {
           const res = await axios.post("https://eunbie.site/api/stt", formData);
-          setSpending(res.data.text);
+          const text = res.data.text?.trim();
+          if (text) {
+            setSpending(text);
+          } else {
+            alert("음성 인식 결과가 비어 있습니다.");
+          }
         } catch (err) {
           console.error("STT 오류:", err);
         }
@@ -193,25 +214,6 @@ const ChatBot = () => {
       audio.play();
     } catch (err) {
       alert("다시듣기 요청에 실패했습니다.");
-    }
-  };
-
-  const handleTestUpload = async () => {
-    const testMessage = "테스트 업로드용 음성입니다.";
-    try {
-      console.log("🛰️ 업로드 테스트 시작");
-
-      const res = await axios.post("https://eunbie.site/api/tts_upload", {
-        user_id,
-        message: testMessage
-      });
-
-      console.log("✅ 업로드 성공:", res.data);
-      alert("업로드 성공!\n" + res.data.url);
-      setS3Key(res.data.s3_key);
-    } catch (err) {
-      console.error("❌ 업로드 실패:", err);
-      alert("업로드 실패: " + (err?.response?.data?.detail || err.message));
     }
   };
 
@@ -258,12 +260,7 @@ const ChatBot = () => {
             onClick={isRecording ? stopRecording : startRecording}
             disabled={loading}
           >
-            {isRecording ? "🛑 멈추기" : "🎙️ 마이크"}
-          </Button>
-
-          {/* ✅ 항상 노출되는 테스트 버튼 */}
-          <Button onClick={handleTestUpload} disabled={loading}>
-            🛰️ 업로드 테스트
+            {isRecording ? "🔚 마침" : "🎧 마이크"}
           </Button>
         </InputArea>
       )}

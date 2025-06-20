@@ -15,6 +15,7 @@ spec:
       containers:
       - name: fastapi
         image: eunbie/fastapi-backend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         envFrom:

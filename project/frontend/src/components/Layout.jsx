@@ -32,7 +32,7 @@ const Layout = ({ left, center, right }) => {
             </li>
             <li>
               <span
-                onClick={() => window.location.href = 'https://oddly-proven-swan.ngrok-free.app/'}
+                onClick={() => window.location.href = 'https://preferably-united-wren.ngrok-free.app/'}
                 style={{ cursor: 'pointer', fontSize: '20px', color: '#666', textDecoration: 'none' }}
               >
                 Analysis
