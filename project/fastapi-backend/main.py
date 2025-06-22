@@ -13,6 +13,7 @@ from app.chat_tts_api import router as chat_tts_router
 from app.stt_api import router as stt_router
 from app.coach import router as coach_router
 from app.actual_spending_api import router as actual_spending_router
+from app.summary_api import router as summary_router
 
 
 app = FastAPI()
@@ -36,3 +37,5 @@ app.include_router(chat_tts_router)
 app.include_router(stt_router)
 app.include_router(coach_router)
 app.include_router(actual_spending_router)
+app.include_router(summary_router)
+

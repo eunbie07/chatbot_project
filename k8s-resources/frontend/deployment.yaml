@@ -15,5 +15,6 @@ spec:
       containers:
       - name: frontend
         image: eunbie/frontend:latest
+        imagePullPolicy: Always    # ✅ 여기 추가!
         ports:
         - containerPort: 80

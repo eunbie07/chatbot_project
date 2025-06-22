@@ -1,7 +1,6 @@
-# ✅ app/actuals.py (동기화 개선 버전)
+# ✅ app/summary_api.py (새로운 파일 생성)
 from fastapi import APIRouter, HTTPException
 from pymongo import MongoClient
-from collections import defaultdict
 import os
 from dotenv import load_dotenv
 import traceback
@@ -13,22 +12,22 @@ router = APIRouter()
 collection = None
 try:
     mongo_uri = os.getenv("MONGODB_URI", "mongodb://mongodb.default.svc.cluster.local:27017")
-    print(f"DEBUG: MongoDB URI used by actuals API: {mongo_uri}")
+    print(f"DEBUG: MongoDB URI used by summary API: {mongo_uri}")
     
     mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
     mongo_client.admin.command('ismaster')
-    print("DEBUG: MongoDB connection successful for actuals")
+    print("DEBUG: MongoDB connection successful for summary")
     
     db = mongo_client.consumption_db
     collection = db.users
 except Exception as e:
-    print(f"ERROR: MongoDB connection failed for actuals: {str(e)}")
+    print(f"ERROR: MongoDB connection failed for summary: {str(e)}")
     collection = None
 
-@router.get("/actuals/{user_id}")
-def get_actuals(user_id: str):
+@router.get("/summary/{user_id}")
+def get_summary(user_id: str):
     try:
-        print(f"DEBUG: ======= Starting actuals API for user: {user_id} =======")
+        print(f"DEBUG: ======= Starting summary API for user: {user_id} =======")
         
         if collection is None:
             raise HTTPException(status_code=500, detail="데이터베이스 연결 오류")
@@ -38,17 +37,27 @@ def get_actuals(user_id: str):
         if not user:
             raise HTTPException(status_code=404, detail="사용자 데이터 없음")
 
-        print(f"DEBUG: User found for actuals")
+        print(f"DEBUG: User found for summary")
         
         if "profile" not in user or "records" not in user["profile"]:
-            return {"user_id": user_id, "actuals": {}}
+            return {
+                "user_id": user_id, 
+                "total_income": 0, 
+                "total_expense": 0,
+                "month": "N/A"
+            }
             
         records = user["profile"]["records"]
         
         if not isinstance(records, list):
-            return {"user_id": user_id, "actuals": {}}
+            return {
+                "user_id": user_id, 
+                "total_income": 0, 
+                "total_expense": 0,
+                "month": "N/A"
+            }
 
-        # ✅ coach.py와 동일한 월 계산 로직
+        # 최신 월 계산 (coach.py와 동일한 로직)
         last_month = "2025-06"  # 기본값
         try:
             for record in reversed(records):
@@ -64,16 +73,17 @@ def get_actuals(user_id: str):
         except Exception as date_error:
             print(f"DEBUG: Error extracting last month: {str(date_error)}")
 
-        print(f"DEBUG: Processing actuals for month: {last_month}")
+        print(f"DEBUG: Processing summary for month: {last_month}")
 
-        actuals = defaultdict(int)
+        total_income = 0
+        total_expense = 0
         processed_count = 0
         
         for record in records:
             if not isinstance(record, dict):
                 continue
                 
-            # 날짜 확인 (coach.py와 동일한 로직)
+            # 날짜 확인
             날짜 = None
             for field in ["날짜", "날", "date"]:
                 if field in record:
@@ -98,20 +108,31 @@ def get_actuals(user_id: str):
                     continue
                     
                 분류 = item.get("분류", item.get("type", ""))
-                if 분류 == "지출":
-                    category = item.get("항목", item.get("category", "")).strip()
-                    amount = item.get("금액", item.get("amount", 0))
-                    
-                    if isinstance(amount, (int, float)) and amount > 0 and category:
-                        actuals[category] += amount
-                        processed_count += 1
+                금액 = item.get("금액", item.get("amount", 0))
+                
+                if isinstance(금액, (int, float)) and 금액 > 0:
+                    if 분류 == "수입":
+                        total_income += 금액
+                    elif 분류 == "지출":
+                        total_expense += 금액
+                    processed_count += 1
 
-        print(f"DEBUG: Actuals processed {processed_count} items for {last_month}: {dict(actuals)}")
-        return {"user_id": user_id, "actuals": dict(actuals)}
+        print(f"DEBUG: Summary processed {processed_count} items for {last_month}")
+        print(f"DEBUG: Total income: {total_income:,}, Total expense: {total_expense:,}")
+        
+        return {
+            "user_id": user_id,
+            "total_income": total_income,
+            "total_expense": total_expense,
+            "month": last_month,
+            "balance": total_income - total_expense
+        }
 
     except HTTPException:
         raise
     except Exception as e:
-        print(f"ERROR in actuals API: {str(e)}")
+        print(f"ERROR in summary API: {str(e)}")
         print(f"ERROR traceback: {traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"데이터 조회 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"요약 데이터 조회 중 오류 발생: {str(e)}")
+
+

@@ -1,22 +1,26 @@
-// App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ChatDetailPage from './pages/ChatDetailPage';
 import DiaryDetailPage from './pages/DiaryDetailPage';
-// import AnalysisPage from './pages/AnalysisPage'; // ❌ 외부 페이지로 이동하므로 import 필요 없음
 import BudgetPage from './pages/BudgetPage';
+import LoginPage from './pages/LoginPage';
+import Navbar from './components/Navbar';
+import { UserProvider } from './contexts/UserContext.jsx';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/chat" element={<ChatDetailPage />} />
-        <Route path="/diary" element={<DiaryDetailPage />} />
-        {/* <Route path="/analysis" element={<AnalysisPage />} /> */} {/* ❌ 외부로 이동하므로 제거 */}
-        <Route path="/budget" element={<BudgetPage />} />
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/chat" element={<ChatDetailPage />} />
+          <Route path="/diary" element={<DiaryDetailPage />} />
+          <Route path="/budget" element={<BudgetPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 

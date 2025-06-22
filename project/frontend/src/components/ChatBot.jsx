@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useUser } from '../contexts/UserContext';
 import axios from 'axios';
 import {
   ChatContainer,
@@ -32,7 +33,13 @@ const ChatBot = () => {
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
 
-  const user_id = "user_female";
+const { user } = useUser();
+
+if (!user?.username) {
+  return <div style={{ padding: '2rem', textAlign: 'center' }}>로그인이 필요합니다.</div>;
+}
+
+const user_id = user.username;  // fallback 제거: 이제 항상 로그인 전제
   const getTime = () => new Date().toTimeString().slice(0, 5);
 
   const addMessage = (role, content) => {

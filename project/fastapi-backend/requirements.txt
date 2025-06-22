@@ -44,4 +44,9 @@ urllib3==2.4.0
 uvicorn==0.34.3
 wcwidth==0.2.13
 websockets==15.0.1
-boto3
+boto3==1.34.110
+langchain>=0.1.16
+langchain-core>=0.1.47
+langchain-community>=0.0.35
+langchain-openai>=0.1.7
+langsmith>=0.1.0

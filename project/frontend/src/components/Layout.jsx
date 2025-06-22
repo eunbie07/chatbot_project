@@ -1,5 +1,7 @@
 // Layout.jsx
 import { Link } from 'react-router-dom';
+import Navbar from './Navbar';
+
 
 const Layout = ({ left, center, right }) => {
   return (
@@ -12,8 +14,8 @@ const Layout = ({ left, center, right }) => {
       padding: 0,
       overflowX: 'hidden'
     }}>
-      
-      {/* ✅ 상단 내비게이션 바 */}
+      {/* <Navbar/> */}
+      {/* ✅ 상단 내비게이션 바
       <nav style={{
         display: 'flex',
         alignItems: 'center',
@@ -49,8 +51,7 @@ const Layout = ({ left, center, right }) => {
             </li>
           </ul>
         </div>
-      </nav>
-
+      </nav> */}
       {/* ✅ 3단 레이아웃 */}
       <div style={{
         display: 'grid',
