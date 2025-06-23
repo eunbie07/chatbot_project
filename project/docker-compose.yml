@@ -1,50 +1,123 @@
+# version: '3.8'
+
+# services:
+#   mongo:
+#     image: mongo:6
+#     container_name: mongo
+#     restart: always
+#     volumes:
+#       - mongo-data:/data/db
+
+#   fastapi-backend:
+#     build: ./project/fastapi-backend
+#     container_name: fastapi-backend
+#     ports:
+#       - "3000:3000"
+#     env_file:
+#       - ./project/fastapi-backend/.env
+#     depends_on:
+#       - mongo
+#     restart: always
+#     volumes:
+#       - ./project/fastapi-backend:/app
+
+#   node-backend:
+#     build: ./project/node-backend
+#     container_name: node-backend
+#     ports:
+#       - "8000:8000"
+#     depends_on:
+#       - fastapi-backend
+#     restart: always
+#     environment:
+#       - FASTAPI_URL=http://fastapi-backend:3000/fastapi
+#     volumes:
+#       - ./project/node-backend:/app
+#       - /app/node_modules
+
+#   frontend:
+#     build:
+#       context: ./project/frontend
+#       dockerfile: Dockerfile.prod
+#     container_name: frontend
+#     ports:
+#       - "8080:80"  # EC2 Nginx에서 이 포트로 접근
+#     depends_on:
+#       - node-backend
+#     restart: always
+
+# volumes:
+#   mongo-data:
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:6
-    container_name: mongo
+  # MongoDB - CICD와 동일한 설정
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
     restart: always
+    ports:
+      - "27017:27017"
+    command: --bind_ip_all
     volumes:
-      - mongo-data:/data/db
+      - mongodb_data:/data/db
+    networks:
+      - app-network
 
-  fastapi-backend:
+  # FastAPI Backend - CICD와 컨테이너명 통일
+  fastapi:
     build: ./project/fastapi-backend
-    container_name: fastapi-backend
+    container_name: fastapi
     ports:
       - "3000:3000"
     env_file:
       - ./project/fastapi-backend/.env
     depends_on:
-      - mongo
+      - mongodb
     restart: always
     volumes:
       - ./project/fastapi-backend:/app
+    networks:
+      - app-network
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
 
+  # Node Backend - Kubernetes 표준에 맞춤
   node-backend:
     build: ./project/node-backend
     container_name: node-backend
     ports:
       - "8000:8000"
     depends_on:
-      - fastapi-backend
+      - fastapi
     restart: always
     environment:
-      - FASTAPI_URL=http://fastapi-backend:3000/fastapi
+      - FASTAPI_URL=http://fastapi:3000  # Kubernetes와 동일 (경로 제거)
     volumes:
       - ./project/node-backend:/app
       - /app/node_modules
+    networks:
+      - app-network
 
+  # Frontend - 기본 Dockerfile 사용
   frontend:
     build:
       context: ./project/frontend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile  # Dockerfile.prod → Dockerfile로 변경
     container_name: frontend
     ports:
-      - "8080:80"  # EC2 Nginx에서 이 포트로 접근
+      - "8080:80"  # 로컬 접근용 포트
     depends_on:
-      - node-backend
+      - node
     restart: always
+    networks:
+      - app-network
 
+# CICD와 동일한 볼륨명 사용
 volumes:
-  mongo-data:
+  mongodb_data:
+
+# CICD와 동일한 네트워크명 사용
+networks:
+  app-network:
+    driver: bridge

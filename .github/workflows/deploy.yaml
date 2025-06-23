@@ -1,0 +1,262 @@
+# name: Deploy Multi App to EC2
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# env:
+#   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+#   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+#   AWS_REGION: ap-southeast-2
+#   EC2_HOST: ${{ secrets.HOST }}
+#   EC2_USERNAME: ${{ secrets.USERNAME }}
+#   EC2_KEY: ${{ secrets.KEY }}
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout Code
+#       uses: actions/checkout@v4
+
+#     - name: Docker Hub Login
+#       uses: docker/login-action@v3
+#       with:
+#         username: ${{ env.DOCKER_HUB_USERNAME }}
+#         password: ${{ env.DOCKER_HUB_TOKEN }}
+
+#     - name: Build and Push FastAPI Backend
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: ./project/fastapi-backend
+#         file: ./project/fastapi-backend/Dockerfile
+#         push: true
+#         tags: ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+
+#     - name: Build and Push Node Backend
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: ./project/node-backend
+#         file: ./project/node-backend/Dockerfile
+#         push: true
+#         tags: ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+
+#     - name: Build and Push Frontend
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: ./project/frontend
+#         file: ./project/frontend/Dockerfile
+#         push: true
+#         tags: ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+#         build-args: |
+#           CACHEBUSTER=${{ github.run_number }}
+
+#     - name: Deploy to EC2
+#       uses: appleboy/ssh-action@master
+#       with:
+#         host: ${{ env.EC2_HOST }}
+#         username: ${{ env.EC2_USERNAME }}
+#         key: ${{ env.EC2_KEY }}
+#         script: |
+#           docker system prune -f
+#           docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+#           docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+#           docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+
+#           docker stop fastapi node frontend mongodb || true
+#           docker rm fastapi node frontend mongodb || true
+
+#           docker network create app-network || true
+#           docker volume create mongodb_data || true
+
+#           mkdir -p /root/project/fastapi-backend
+#           cat <<EOF > /root/project/fastapi-backend/.env
+#           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+#           ELEVEN_API_KEY=${{ secrets.ELEVEN_API_KEY }}
+#           ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
+#           AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+#           AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+#           AWS_REGION=ap-southeast-2
+#           MONGODB_URI=mongodb://mongodb:27017
+#           EOF
+
+#           docker run -d --restart always \
+#             --name mongodb \
+#             --network app-network \
+#             -p 27017:27017 \
+#             -v mongodb_data:/data/db \
+#             mongo:latest \
+#             --bind_ip_all \
+
+
+#           success=false
+#           for i in {1..30}; do
+#             if docker exec mongodb mongosh --eval "db.runCommand('ping')" >/dev/null 2>&1; then
+#               echo "✅ MongoDB 준비 완료"
+#               success=true
+#               break
+#             fi
+#             echo "MongoDB 대기 중... ($i/30)"
+#             sleep 2
+#           done
+
+#           if [ "$success" = false ]; then
+#             echo "❌ MongoDB가 시작되지 않았습니다."
+#             docker logs mongodb
+#             exit 1
+#           fi
+
+#           docker run -d --restart always \
+#             --name fastapi \
+#             --network app-network \
+#             -p 3000:3000 \
+#             --env-file /root/project/fastapi-backend/.env \
+#             ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+
+#           sleep 5
+
+#           docker run -d --restart always \
+#             --name node \
+#             --network app-network \
+#             -p 8000:8000 \
+#             -e FASTAPI_URL=http://fastapi:3000/fastapi \
+#             ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+
+#           docker run -d --restart always \
+#             --name frontend \
+#             --network app-network \
+#             ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+
+#           docker compose -f /root/reverse-proxy/docker-compose.yml restart nginx
+
+#           echo "✅ 전체 배포 완료"
+name: Deploy Multi App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+  AWS_REGION: ap-southeast-2
+  EC2_HOST: ${{ secrets.HOST }}
+  EC2_USERNAME: ${{ secrets.USERNAME }}
+  EC2_KEY: ${{ secrets.KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Docker Hub Login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ env.DOCKER_HUB_USERNAME }}
+        password: ${{ env.DOCKER_HUB_TOKEN }}
+
+    - name: Build and Push FastAPI Backend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./project/fastapi-backend
+        file: ./project/fastapi-backend/Dockerfile
+        push: true
+        tags: ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+
+    - name: Build and Push Node Backend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./project/node-backend
+        file: ./project/node-backend/Dockerfile
+        push: true
+        tags: ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+
+    - name: Build and Push Frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./project/frontend
+        file: ./project/frontend/Dockerfile
+        push: true
+        tags: ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+        build-args: |
+          CACHEBUSTER=${{ github.run_number }}
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ env.EC2_HOST }}
+        username: ${{ env.EC2_USERNAME }}
+        key: ${{ env.EC2_KEY }}
+        script: |
+          docker system prune -f
+          docker pull ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+          docker pull ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+          docker pull ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+
+          # nginx 설정과 일치하는 컨테이너명 사용
+          docker stop frontend fastapi node || true
+          docker rm frontend fastapi node || true
+
+          # 네트워크 생성 (MongoDB 볼륨 제거)
+          docker network create app-network || true
+
+          mkdir -p /root/project/fastapi-backend
+          cat <<EOF > /root/project/fastapi-backend/.env
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          ELEVEN_API_KEY=${{ secrets.ELEVEN_API_KEY }}
+          ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+          AWS_REGION=ap-southeast-2
+          MONGODB_URI=mongodb://${{ env.EC2_HOST }}:32017
+          EOF
+
+          # Kubernetes MongoDB 연결 확인
+          echo "🔍 Kubernetes MongoDB 연결 테스트..."
+          if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${{ env.EC2_HOST }}/32017"; then
+            echo "✅ Kubernetes MongoDB 연결 성공 (${{ env.EC2_HOST }}:32017)"
+          else
+            echo "❌ Kubernetes MongoDB에 연결할 수 없습니다. 배포를 중단합니다."
+            echo "Kubernetes MongoDB가 실행 중인지 확인하세요:"
+            echo "kubectl get pods -n multiapp | grep mongodb"
+            exit 1
+          fi
+
+          # FastAPI Backend - nginx upstream과 일치하는 이름
+          docker run -d --restart always \
+            --name fastapi \
+            --network app-network \
+            -p 3001:3000 \
+            --env-file /root/project/fastapi-backend/.env \
+            ${{ env.DOCKER_HUB_USERNAME }}/fastapi-backend:latest
+
+          sleep 5
+
+          # Node Backend - nginx upstream과 일치하는 이름
+          docker run -d --restart always \
+            --name node \
+            --network app-network \
+            -p 8001:8000 \
+            -e FASTAPI_URL=http://fastapi:3000 \
+            ${{ env.DOCKER_HUB_USERNAME }}/node-backend:latest
+
+          # Frontend - nginx upstream과 일치하는 이름
+          docker run -d --restart always \
+            --name frontend \
+            --network app-network \
+            -p 8080:80 \
+            ${{ env.DOCKER_HUB_USERNAME }}/frontend:latest
+
+          echo "✅ 애플리케이션 배포 완료"
+          echo "📋 수동으로 nginx 설정을 업데이트하세요:"
+          echo "   - Frontend: localhost:8080"
+          echo "   - Node API: localhost:8001" 
+          echo "   - FastAPI: localhost:3001"

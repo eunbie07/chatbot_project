@@ -22,4 +22,4 @@ spec:
             - containerPort: 8000
           env:                                  # ✅ 여기에 추가
             - name: FASTAPI_URL
-              value: http://10.107.28.233:3000
+              value: "http://fastapi:3000"

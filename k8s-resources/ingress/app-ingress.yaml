@@ -24,6 +24,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: node
+                name: node-backend
                 port:
                   number: 8000
