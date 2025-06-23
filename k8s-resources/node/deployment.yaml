@@ -12,6 +12,8 @@ spec:
       labels:
         app: node-backend
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: master13
       containers:
         - name: node-backend
           image: eunbie/node-backend:latest

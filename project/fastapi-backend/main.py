@@ -14,7 +14,8 @@ from app.stt_api import router as stt_router
 from app.coach import router as coach_router
 from app.actual_spending_api import router as actual_spending_router
 from app.summary_api import router as summary_router
-
+from app.diary_api import router as diary_router
+from app.conversation_api import router as conversation_router
 
 app = FastAPI()
 
@@ -38,4 +39,5 @@ app.include_router(stt_router)
 app.include_router(coach_router)
 app.include_router(actual_spending_router)
 app.include_router(summary_router)
-
+app.include_router(diary_router, prefix="/diary", tags=["diary"])  # ✅ prefix 추가
+app.include_router(conversation_router, prefix="/conversations", tags=["conversations"])

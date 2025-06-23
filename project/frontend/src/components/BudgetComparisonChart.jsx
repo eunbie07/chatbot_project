@@ -29,6 +29,12 @@ const mockActualsData = {
 // API 호출 함수들 (실패 시 목 데이터 사용)
 const fetchCoachingData = async (userId) => {
   try {
+    // 개발 환경에서는 바로 목 데이터 반환
+    if (process.env.NODE_ENV === 'development' && Math.random() > 0.3) {
+      console.log('🎯 개발 모드: 목 데이터 사용');
+      return mockCoachingData;
+    }
+    
     const response = await fetch(`https://eunbie.site/api/coach/${userId}`);
     if (!response.ok) {
       throw new Error(`서버 오류: ${response.status}`);
@@ -39,7 +45,7 @@ const fetchCoachingData = async (userId) => {
     }
     return data;
   } catch (error) {
-    console.warn('API 호출 실패, 목 데이터 사용:', error.message);
+    console.log('📊 API 실패, 샘플 데이터로 진행:', error.message);
     // API 실패 시 목 데이터 반환
     return mockCoachingData;
   }
@@ -47,6 +53,11 @@ const fetchCoachingData = async (userId) => {
 
 const fetchActualsData = async (userId) => {
   try {
+    // 개발 환경에서는 바로 목 데이터 반환
+    if (process.env.NODE_ENV === 'development' && Math.random() > 0.3) {
+      return mockActualsData;
+    }
+    
     const response = await fetch(`https://eunbie.site/api/actuals/${userId}`);
     if (!response.ok) {
       throw new Error(`서버 오류: ${response.status}`);
@@ -57,7 +68,7 @@ const fetchActualsData = async (userId) => {
     }
     return data.actuals || {};
   } catch (error) {
-    console.warn('API 호출 실패, 목 데이터 사용:', error.message);
+    console.log('📊 API 실패, 샘플 데이터로 진행:', error.message);
     // API 실패 시 목 데이터 반환
     return mockActualsData;
   }

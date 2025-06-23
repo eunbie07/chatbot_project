@@ -1,95 +1,160 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';  // ✅ Context 사용
+import { useUser } from '../contexts/UserContext';
 
-export default function Navbar() {
-  const { user, setUser } = useUser();
+const Navbar = () => {
+  const { user, logout } = useUser();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('username');
-    navigate('/');
+    logout();
+    navigate('/login');
   };
 
   return (
     <nav style={{
-      borderBoxSizing: 'border-box',
       display: 'flex',
-      justifyContent: 'space-between',   // ✅ 사용자 정보 우측 정렬
       alignItems: 'center',
+      justifyContent: 'space-between',
       padding: '20px 40px',
       backgroundColor: '#fff',
       boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+      marginBottom: '20px'
     }}>
+      {/* 왼쪽: 로고와 메뉴 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
-        <div style={{
-          fontSize: '22px',
-          fontWeight: 'bold',
-          color: '#6C63FF',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
+        <div style={{ 
+          fontSize: '22px', 
+          fontWeight: 'bold', 
+          color: '#6C63FF', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px' 
         }}>
-          <img src="/chatbot_main.png" alt="리마인봇 로고" style={{ height: '80px', verticalAlign: 'middle' }} />
+          <img 
+            src="/chatbot_main.png" 
+            alt="리마인봇 로고" 
+            style={{ height: '80px', verticalAlign: 'middle' }} 
+          />
         </div>
-        <ul style={{ display: 'flex', gap: '30px', listStyle: 'none', margin: 0, padding: 0 }}>
-          <li><Link to="/" style={linkStyle}>Home</Link></li>
+        
+        <ul style={{ 
+          display: 'flex', 
+          gap: '30px', 
+          listStyle: 'none', 
+          margin: 0, 
+          padding: 0 
+        }}>
+          <li>
+            <Link to="/" style={{ 
+              textDecoration: 'none', 
+              fontSize: '20px', 
+              color: '#666' 
+            }}>
+              Home
+            </Link>
+          </li>
           <li>
             <span
               onClick={() => window.location.href = 'https://preferably-united-wren.ngrok-free.app/'}
-              style={{ ...linkStyle, cursor: 'pointer' }}
+              style={{ 
+                cursor: 'pointer', 
+                fontSize: '20px', 
+                color: '#666', 
+                textDecoration: 'none' 
+              }}
             >
               Analysis
             </span>
           </li>
-          <li><Link to="/chat" style={linkStyle}>Chat</Link></li>
-          <li><Link to="/diary" style={linkStyle}>Diary</Link></li>
-          <li><Link to="/budget" style={linkStyle}>Budget</Link></li>
+          <li>
+            <Link to="/chat" style={{ 
+              textDecoration: 'none', 
+              fontSize: '20px', 
+              color: '#666' 
+            }}>
+              Chat
+            </Link>
+          </li>
+          <li>
+            <Link to="/diary" style={{ 
+              textDecoration: 'none', 
+              fontSize: '20px', 
+              color: '#666' 
+            }}>
+              Diary
+            </Link>
+          </li>
+          <li>
+            <Link to="/budget" style={{ 
+              textDecoration: 'none', 
+              fontSize: '20px', 
+              color: '#666' 
+            }}>
+              Budget
+            </Link>
+          </li>
+          <li>
+            <Link to="/budgetA" style={{ 
+              textDecoration: 'none', 
+              fontSize: '20px', 
+              color: '#666' 
+            }}>
+              Budget
+            </Link>
+          </li>
         </ul>
       </div>
 
-      {/* 👤 사용자 정보 표시 영역 */}
-      <div>
+      {/* 오른쪽: 사용자 정보와 로그아웃 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         {user ? (
           <>
-            <span style={{ marginRight: '16px', color: '#333', fontWeight: '500' }}>
-              👋 {user.username}
+            <span style={{ 
+              fontSize: '16px', 
+              color: '#666',
+              fontWeight: '500'
+            }}>
+              안녕하세요, {user.username}님!
             </span>
             <button
               onClick={handleLogout}
               style={{
-                padding: '6px 12px',
-                backgroundColor: '#eee',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                cursor: 'pointer'
+                backgroundColor: '#6C63FF',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
               }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#5A52D5'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#6C63FF'}
             >
               로그아웃
             </button>
           </>
         ) : (
-          <button
-            onClick={() => navigate('/login')}
+          <Link 
+            to="/login"
             style={{
-              padding: '6px 12px',
               backgroundColor: '#6C63FF',
               color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              textDecoration: 'none',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              transition: 'background-color 0.2s'
             }}
           >
             로그인
-          </button>
+          </Link>
         )}
       </div>
     </nav>
   );
-}
-
-const linkStyle = {
-  textDecoration: 'none',
-  fontSize: '20px',
-  color: '#666',
 };
+
+export default Navbar;

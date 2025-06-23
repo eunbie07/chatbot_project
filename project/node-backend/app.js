@@ -11,6 +11,8 @@ const sttRouter = require('./routes/stt');
 const coachRouter = require('./routes/coach');
 const actualsRouter = require('./routes/actuals');
 const summaryRouter = require('./routes/summary');
+const diaryRouter = require('./routes/diary');
+const conversationsRouter = require('./routes/conversations');
 
 const app = express();
 app.use(cors());
@@ -27,6 +29,9 @@ app.use('/api/stt', sttRouter);
 app.use('/api/coach', coachRouter);
 app.use('/api/actuals', actualsRouter);
 app.use('/api/summary', summaryRouter);
+app.use('/api/diary', diaryRouter);
+app.use('/api/conversations', conversationsRouter);
+
 
 app.listen(8000, () => {
   console.log('✅ Node.js API Gateway on http://13.237.236.117:8000');

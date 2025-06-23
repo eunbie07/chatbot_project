@@ -42,3 +42,8 @@ echo "사용하지 않는 모든 Docker 이미지 삭제 중..."
 docker image prune -a -f
 
 echo "모든 프론트엔드 관련 Docker 작업이 완료되었습니다."
+
+docker builder prune -f
+echo "Docker Build Cache 정리."
+
+kubectl get pods

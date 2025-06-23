@@ -6,6 +6,7 @@ import BudgetPage from './pages/BudgetPage';
 import LoginPage from './pages/LoginPage';
 import Navbar from './components/Navbar';
 import { UserProvider } from './contexts/UserContext.jsx';
+import AnalysisPage from './pages/BudgetPageA.jsx';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/chat" element={<ChatDetailPage />} />
           <Route path="/diary" element={<DiaryDetailPage />} />
           <Route path="/budget" element={<BudgetPage />} />
+          <Route path="/budgetA" element={<AnalysisPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Routes>
       </Router>

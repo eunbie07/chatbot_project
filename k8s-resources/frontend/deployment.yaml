@@ -12,9 +12,11 @@ spec:
       labels:
         app: frontend
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: master13
       containers:
       - name: frontend
         image: eunbie/frontend:latest
-        imagePullPolicy: Always    # ✅ 여기 추가!
+        imagePullPolicy: Always
         ports:
         - containerPort: 80

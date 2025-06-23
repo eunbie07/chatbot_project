@@ -12,6 +12,8 @@ spec:
       labels:
         app: fastapi
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: master13
       containers:
       - name: fastapi
         image: eunbie/fastapi-backend:latest
@@ -28,3 +30,4 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "500m"
+

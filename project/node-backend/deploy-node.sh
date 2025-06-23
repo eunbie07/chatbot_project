@@ -38,3 +38,8 @@ fi
 echo "Kubernetes node-backend 배포 롤아웃 재시작 완료."
 
 echo "모든 Node.js 백엔드 관련 Docker 작업이 완료되었습니다."
+
+docker builder prune -f
+echo "Docker Build Cache 정리."
+
+kubectl get pods

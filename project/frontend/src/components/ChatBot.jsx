@@ -6,6 +6,8 @@ import {
   ChatHeader,
   ChatArea,
   MessageBox,
+  ProfileImage,
+  MessageContent,
   MessageText,
   MessageMeta,
   InputArea,
@@ -16,7 +18,8 @@ import {
   SpeakingText
 } from './ChatStyles';
 
-const ChatBot = () => {
+const ChatBot = ({ onConversationComplete }) => {
+  // 모든 훅을 먼저 선언
   const [step, setStep] = useState(1);
   const [spending, setSpending] = useState('');
   const [emotion, setEmotion] = useState('');
@@ -27,24 +30,42 @@ const ChatBot = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [s3Key, setS3Key] = useState(null);
-
   const [userInputs, setUserInputs] = useState({ spending: '', emotion: '', effect: '' });
 
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
+  const { user } = useUser();
 
-const { user } = useUser();
+  // 초기화 useEffect
+  useEffect(() => {
+    initializeChat();
+  }, []);
 
-if (!user?.username) {
-  return <div style={{ padding: '2rem', textAlign: 'center' }}>로그인이 필요합니다.</div>;
-}
-
-const user_id = user.username;  // fallback 제거: 이제 항상 로그인 전제
+  // 유틸리티 함수들
   const getTime = () => new Date().toTimeString().slice(0, 5);
 
   const addMessage = (role, content) => {
     setHistory((prev) => [...prev, { role, content, time: getTime() }]);
   };
+
+  const initializeChat = () => {
+    const currentTime = new Date().toTimeString().slice(0, 5);
+    setSpending('');
+    setEmotion('');
+    setEffect('');
+    setRecommendation('');
+    setHistory([{ role: 'bot', content: "오늘 어떤 소비를 하셨나요?", time: currentTime }]);
+    setStep(1);
+    setS3Key(null);
+    setUserInputs({ spending: '', emotion: '', effect: '' });
+  };
+
+  // 로그인되지 않은 경우 처리
+  if (!user?.username) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>로그인이 필요합니다.</div>;
+  }
+
+  const user_id = user.username;
 
   const handleSubmitSpending = () => {
     const trimmed = spending.trim();
@@ -108,12 +129,14 @@ const user_id = user.username;  // fallback 제거: 이제 항상 로그인 전�
         { role: "user", content: currentInputs.effect },
         { role: "gpt", content: reply }
       ].filter(item => item.content && item.content.trim() !== "");
-
+      
+      console.log('📝 대화 저장 시작...');
       await axios.post("https://eunbie.site/api/log-convo", {
         user_id,
         date: new Date().toISOString().slice(0, 10),
         history: convoHistory
       });
+      console.log('✅ 대화 저장 완료!');
 
       const streamRes = await fetch("https://eunbie.site/api/tts", {
         method: "POST",
@@ -137,7 +160,9 @@ const user_id = user.username;  // fallback 제거: 이제 항상 로그인 전�
       });
 
       setS3Key(uploadRes.data.s3_key);
-
+      
+      console.log('✅ 대화 완료! 다시시작하기 버튼을 눌러 새로운 대화를 시작하세요.');
+      
     } catch (err) {
       console.error("GPT 또는 업로드 오류:", err);
       setHistory((prev) => [
@@ -150,19 +175,13 @@ const user_id = user.username;  // fallback 제거: 이제 항상 로그인 전�
   };
 
   const reset = () => {
-    setSpending('');
-    setEmotion('');
-    setEffect('');
-    setRecommendation('');
-    setHistory([{ role: 'bot', content: "오늘 어떤 소비를 하셨나요?", time: getTime() }]);
-    setStep(1);
-    setS3Key(null);
-    setUserInputs({ spending: '', emotion: '', effect: '' });
+    initializeChat();
+    
+    if (onConversationComplete) {
+      console.log('🔄 다시시작하기 - 대화 목록 새로고침!');
+      onConversationComplete();
+    }
   };
-
-  useEffect(() => {
-    reset();
-  }, []);
 
   const startRecording = async () => {
     try {
@@ -225,73 +244,197 @@ const user_id = user.username;  // fallback 제거: 이제 항상 로그인 전�
   };
 
   return (
-    <ChatContainer>
-      <ChatHeader>감정 소비 반성 챗봇</ChatHeader>
+    <ChatContainer style={{
+      height: '70vh',
+      minHeight: '500px',
+      maxHeight: '800px',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <ChatHeader>Mindful Spending Chatbot</ChatHeader>
 
-      <ChatArea>
+      <ChatArea style={{
+        flex: 1,
+        overflowY: 'auto',
+        maxHeight: 'calc(70vh - 200px)',
+        padding: '16px'
+      }}>
         {history.map((item, idx) => (
-          <MessageBox key={idx} align={item.role === 'user' ? 'right' : 'left'}>
-            <NameTag>{item.role === 'user' ? '나' : 'Chatbot'}</NameTag>
-            {item.content !== null ? (
-              <>
-                <MessageText bg={item.role === 'user' ? '#d7d0ff' : '#e3f0ff'}>
-                  {item.content}
-                </MessageText>
-                <MessageMeta>{item.time}</MessageMeta>
-              </>
-            ) : (
-              <DotLoader><span></span><span></span><span></span></DotLoader>
+          <MessageBox
+            key={idx}
+            $align={item.role === 'user' ? 'right' : 'left'}
+          >
+            {/* 챗봇 프로필 이미지 (왼쪽에만) */}
+            {item.role === 'bot' && (
+              <ProfileImage $isBot={true}>
+                <img 
+                  src="/chatbot-profile.png" 
+                  alt="챗봇" 
+                  style={{width: '100%', height: '100%', borderRadius: '50%'}} 
+                />
+              </ProfileImage>
+            )}
+            
+            <MessageContent $align={item.role === 'user' ? 'right' : 'left'}>
+              {/* 이름 태그 */}
+              <NameTag $align={item.role === 'user' ? 'right' : 'left'}>
+                {item.role === 'user' ? '나' : 'Chatbot'}
+              </NameTag>
+              
+              {/* 메시지 내용 */}
+              {item.content !== null ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  flexDirection: item.role === 'user' ? 'row-reverse' : 'row',
+                  gap: '8px'
+                }}>
+                  <MessageText $align={item.role === 'user' ? 'right' : 'left'}>
+                    {item.content}
+                  </MessageText>
+                  
+                  <MessageMeta $align={item.role === 'user' ? 'right' : 'left'}>
+                    {item.time}
+                  </MessageMeta>
+                </div>
+              ) : (
+                // 로딩 인디케이터
+                <div style={{
+                  backgroundColor: '#f1f3f4',
+                  padding: '12px 16px',
+                  borderRadius: '18px 18px 18px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <DotLoader>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </DotLoader>
+                </div>
+              )}
+            </MessageContent>
+            
+            {/* 사용자 프로필 이미지 (오른쪽에만) */}
+            {item.role === 'user' && (
+              <ProfileImage $isBot={false}>
+                <img 
+                  src="/user-profile.png" 
+                  alt="사용자" 
+                  style={{width: '100%', height: '100%', borderRadius: '50%'}} 
+                />
+              </ProfileImage>
             )}
           </MessageBox>
         ))}
       </ChatArea>
 
       {isSpeaking && (
-        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-          <SpeakingIndicator><span></span><span></span><span></span></SpeakingIndicator>
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: '12px',
+          padding: '8px',
+          backgroundColor: '#f0f8ff',
+          borderRadius: '8px',
+          margin: '8px 16px'
+        }}>
+          <SpeakingIndicator>
+            <span></span>
+            <span></span>
+            <span></span>
+          </SpeakingIndicator>
           <SpeakingText>챗봇이 말하고 있어요...</SpeakingText>
         </div>
       )}
 
       {step === 1 && (
-        <InputArea>
+        <InputArea style={{
+          flexShrink: 0,
+          padding: '16px',
+          borderTop: '1px solid #e0e0e0',
+          backgroundColor: '#ffffff'
+        }}>
           <input
             value={spending}
             onChange={(e) => setSpending(e.target.value)}
             placeholder="예: 카페, 옷, 배달 등"
             onKeyDown={(e) => e.key === 'Enter' && handleSubmitSpending()}
             disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              marginBottom: '8px',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              fontSize: '14px'
+            }}
           />
-          <Button onClick={handleSubmitSpending} disabled={loading}>전송</Button>
-          <Button
-            onClick={isRecording ? stopRecording : startRecording}
-            disabled={loading}
-          >
-            {isRecording ? "🔚 마침" : "🎧 마이크"}
-          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button onClick={handleSubmitSpending} disabled={loading}>
+              전송
+            </Button>
+            <Button
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={loading}
+            >
+              {isRecording ? "🔚 마침" : "🎧 마이크"}
+            </Button>
+          </div>
         </InputArea>
       )}
 
       {step === 2 && (
-        <InputArea>
+        <InputArea style={{
+          flexShrink: 0,
+          padding: '16px',
+          borderTop: '1px solid #e0e0e0',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}>
           {["스트레스", "보상심리", "충동", "무기력", "습관"].map((e) => (
-            <Button key={e} onClick={() => handleSelectEmotion(e)} disabled={loading}>{e}</Button>
+            <Button key={e} onClick={() => handleSelectEmotion(e)} disabled={loading}>
+              {e}
+            </Button>
           ))}
         </InputArea>
       )}
 
       {step === 3 && (
-        <InputArea>
+        <InputArea style={{
+          flexShrink: 0,
+          padding: '16px',
+          borderTop: '1px solid #e0e0e0',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}>
           {["좋아짐", "변화없음", "더 안좋아짐"].map((e) => (
-            <Button key={e} onClick={() => handleSelectEffect(e)} disabled={loading}>{e}</Button>
+            <Button key={e} onClick={() => handleSelectEffect(e)} disabled={loading}>
+              {e}
+            </Button>
           ))}
         </InputArea>
       )}
 
       {step === 4 && recommendation && (
-        <InputArea>
-          <Button onClick={reset} disabled={loading}>다시 시작하기</Button>
-          <Button onClick={handleReplay} disabled={!s3Key || loading}>다시 듣기</Button>
+        <InputArea style={{
+          flexShrink: 0,
+          padding: '16px',
+          borderTop: '1px solid #e0e0e0',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          gap: '8px'
+        }}>
+          <Button onClick={reset} disabled={loading}>
+            다시 시작하기
+          </Button>
+          <Button onClick={handleReplay} disabled={!s3Key || loading}>
+            다시 듣기
+          </Button>
         </InputArea>
       )}
     </ChatContainer>
