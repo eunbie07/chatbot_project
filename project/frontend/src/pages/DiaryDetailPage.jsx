@@ -381,7 +381,7 @@ export default function EmotionConsumptionDiary() {
       ctx.fillStyle = '#666666';
       ctx.font = 'italic 18px Arial, sans-serif';
       y += 60;
-      ctx.fillText('🤖 AI 조언', canvas.width / 2, y);
+      ctx.fillText('Chatbot AI 조언', canvas.width / 2, y);
       
       ctx.font = '16px Arial, sans-serif';
       const advice = entry.advice;
@@ -566,7 +566,7 @@ export default function EmotionConsumptionDiary() {
           margin: '0 auto 24px',
           lineHeight: '1.6'
         }}>
-          김소연님의 감정-소비 패턴을 분석하여 건강한 소비습관을 만들어가세요
+          감정-소비 패턴을 분석하여 건강한 소비습관을 만들어가세요
         </p>
 
         {/* 통계 요약 */}
@@ -740,7 +740,7 @@ export default function EmotionConsumptionDiary() {
                     cursor: newDiaryText.trim().length >= 10 ? 'pointer' : 'not-allowed'
                   }}
                 >
-                  🤖 패턴 분석하기
+                  패턴 분석하기
                 </button>
               </div>
             </div>
@@ -939,7 +939,7 @@ export default function EmotionConsumptionDiary() {
                         top: '-8px',
                         left: '20px',
                         fontSize: '16px'
-                      }}>🤖</div>
+                      }}>Chatbot</div>
                       <p style={{
                         fontSize: '13px',
                         color: '#5a6c7d',
@@ -964,7 +964,7 @@ export default function EmotionConsumptionDiary() {
                     border: 'none',
                     padding: '14px 28px',
                     borderRadius: '14px',
-                    fontSize: '14px',
+                    fontSize: '16px',
                     fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
@@ -980,7 +980,7 @@ export default function EmotionConsumptionDiary() {
                     e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
                   }}
                 >
-                  📥 소비 카드 다운로드
+                  Download
                 </button>
               </div>
             ))}
@@ -1108,7 +1108,7 @@ export default function EmotionConsumptionDiary() {
                     borderRadius: '8px',
                     margin: 0
                   }}>
-                    🤖 {entry.advice}
+                    Chatbot {entry.advice}
                   </p>
                 </div>
               </div>

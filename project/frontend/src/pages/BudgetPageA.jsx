@@ -27,7 +27,7 @@ const normalizeCategory = (category) => {
   return categoryMap[category] || category;
 };
 
-// API 호출 함수들
+// 실제 API 호출 함수들
 const fetchCoachingData = async (userId) => {
   try {
     const response = await fetch(`https://eunbie.site/api/coach/${userId}`);
@@ -146,7 +146,7 @@ const BudgetPageA = () => {
     }
   }, [userId]);
 
-  // 🔥 카테고리 정규화된 실제 소비 데이터 계산
+  // 카테고리 정규화된 실제 소비 데이터 계산
   const normalizedActuals = useMemo(() => {
     const normalized = {};
     Object.entries(actuals).forEach(([category, amount]) => {
@@ -156,7 +156,7 @@ const BudgetPageA = () => {
     return normalized;
   }, [actuals]);
 
-  // 🔥 예산 데이터도 정규화 (일관성을 위해)
+  // 예산 데이터도 정규화 (일관성을 위해)
   const normalizedBudgets = useMemo(() => {
     const normalized = {};
     Object.entries(budgets).forEach(([category, amount]) => {
@@ -193,7 +193,7 @@ const BudgetPageA = () => {
       const budget = normalizedBudgets[category] || 0;
       const actual = normalizedActuals[category] || 0;
       const difference = actual - budget;
-      const percentage = budget > 0 ? ((actual / budget) * 100) : (actual > 0 ? 999 : 0); // 예산이 0이면 999%로 표시
+      const percentage = budget > 0 ? ((actual / budget) * 100) : (actual > 0 ? 999 : 0);
       
       // 예산이나 실제 소비가 있는 경우만 포함
       if (budget > 0 || actual > 0) {
@@ -223,7 +223,7 @@ const BudgetPageA = () => {
     }));
   }, [normalizedActuals]);
 
-  const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3'];
+  const COLORS = ['#FFB6C1', '#DDA0DD', '#98D8E8', '#F0E68C', '#FFE4B5', '#D8BFD8'];
 
   const formatCurrency = (value) => {
     return `${value.toLocaleString()}원`;
@@ -255,7 +255,7 @@ const BudgetPageA = () => {
         <div className="bg-white p-4 border rounded-lg shadow-lg border-gray-200">
           <p className="font-bold text-gray-800">{data.name}</p>
           <p className="text-sm text-gray-600">{formatCurrency(data.value)}</p>
-          <p className="text-sm text-blue-600">{percentage}%</p>
+          <p className="text-sm text-purple-600">{percentage}%</p>
         </div>
       );
     }
@@ -266,13 +266,13 @@ const BudgetPageA = () => {
   const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
         
         {/* 헤더 */}
         <div className="text-center mb-8">
           <div className="text-6xl mb-4"></div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Budget & Spending Tracker 
           </h1>
           <p className="text-gray-600 text-lg">상세한 소비 패턴과 트렌드를 분석해보세요</p>
@@ -281,7 +281,7 @@ const BudgetPageA = () => {
             <button 
               onClick={loadData}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50"
+              className="px-6 py-3 bg-purple-300 text-white rounded-full hover:bg-purple-400 transition-all duration-200 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50"
             >
               {loading ? (
                 <div className="flex items-center space-x-2">
@@ -301,7 +301,7 @@ const BudgetPageA = () => {
             <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-md mx-auto">
               <div className="text-4xl mb-4">⚠️</div>
               <p className="font-semibold text-red-800 mb-2">오류 발생</p>
-              <p className="text-sm text-red-600 mb-4">{error}</p>
+              <p className="text-sm text-red-400 mb-4">{error}</p>
               <button 
                 onClick={loadData}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -317,33 +317,33 @@ const BudgetPageA = () => {
           <>
             {/* 요약 카드들 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-red-500 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-red-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">총 지출</p>
-                    <p className="text-2xl font-bold text-red-600">{formatCurrency(totalExpense)}</p>
+                    <p className="text-sm font-bold text-gray-600 mb-1">총 지출</p>
+                    <p className="text-2xl font-bold text-red-400">{formatCurrency(totalExpense)}</p>
                     <p className="text-xs text-gray-500 mt-1">이번 달 지출액</p>
                   </div>
                   <div className="text-4xl">💸</div>
                 </div>
               </div>
               
-              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-purple-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">총 수입</p>
-                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalIncome)}</p>
+                    <p className="text-sm font-bold text-gray-600 mb-1">총 수입</p>
+                    <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalIncome)}</p>
                     <p className="text-xs text-gray-500 mt-1">이번 달 수입액</p>
                   </div>
                   <div className="text-4xl">💰</div>
                 </div>
               </div>
               
-              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-green-500 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-green-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">잔액</p>
-                    <p className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className="text-sm font-bold text-gray-600 mb-1">잔액</p>
+                    <p className={`text-2xl font-bold ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {formatCurrency(balance)}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">저축률: {savingsRate}%</p>
@@ -352,11 +352,11 @@ const BudgetPageA = () => {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-yellow-500 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <div className="bg-white p-6 rounded-2xl shadow-xl border-l-4 border-orange-300 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">저축 목표</p>
-                    <p className="text-2xl font-bold text-yellow-600">{formatCurrency(savingGoal)}</p>
+                    <p className="text-sm font-bold text-gray-600 mb-1">저축 목표</p>
+                    <p className="text-2xl font-bold text-orange-400">{formatCurrency(savingGoal)}</p>
                     <p className="text-xs text-gray-500 mt-1">
                       달성률: {savingGoal > 0 ? Math.min(100, ((balance / savingGoal) * 100)).toFixed(0) : 0}%
                     </p>
@@ -379,9 +379,9 @@ const BudgetPageA = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl font-bold transition-all duration-300 ${
                       activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg transform scale-105'
+                        ? 'bg-purple-300 text-white shadow-lg transform scale-105'
                         : 'text-gray-600 hover:bg-gray-100 hover:scale-102'
                     }`}
                   >
@@ -448,7 +448,7 @@ const BudgetPageA = () => {
                                   )}
                                 </div>
                               </div>
-                              <span className={`font-bold text-lg ${isOverBudget ? 'text-red-600' : 'text-gray-800'}`}>
+                              <span className={`font-bold text-lg ${isOverBudget ? 'text-red-400' : 'text-gray-800'}`}>
                                 {formatCurrency(amount)}
                               </span>
                             </div>
@@ -499,7 +499,7 @@ const BudgetPageA = () => {
                       <Legend />
                       <Bar 
                         dataKey="예산" 
-                        fill="#3B82F6" 
+                        fill="#C4B5FD" 
                         radius={[4, 4, 0, 0]}
                         name="예산"
                       />
@@ -532,8 +532,8 @@ const BudgetPageA = () => {
                         type="monotone" 
                         dataKey="예산" 
                         stackId="1" 
-                        stroke="#8884d8" 
-                        fill="#8884d8" 
+                        stroke="#A78BFA" 
+                        fill="#A78BFA" 
                         fillOpacity={0.3}
                         name="예산"
                       />
@@ -557,8 +557,8 @@ const BudgetPageA = () => {
                       />
                     </AreaChart>
                   </ResponsiveContainer>
-                  <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-                    <p className="text-sm text-blue-700 text-center">
+                  <div className="mt-6 p-4 bg-purple-50 rounded-xl">
+                    <p className="text-sm text-purple-700 text-center">
                       💡 5월 데이터를 기반으로 한 추정 트렌드입니다. 실제 과거 데이터는 향후 업데이트 예정입니다.
                     </p>
                   </div>
@@ -608,7 +608,7 @@ const BudgetPageA = () => {
                           
                           <div className="text-right ml-6">
                             <div className={`text-2xl font-bold ${
-                              item.status === 'over' ? 'text-red-600' : 'text-green-600'
+                              item.status === 'over' ? 'text-red-400' : 'text-green-600'
                             }`}>
                               {item.status === 'over' ? '+' : ''}{formatCurrency(Math.abs(item.difference))}
                             </div>
@@ -634,8 +634,8 @@ const BudgetPageA = () => {
                     <h3 className="text-2xl font-bold mb-6 text-gray-800">🧠 AI 맞춤 조언</h3>
                     <div className="space-y-4">
                       {tips.map((tip, index) => (
-                        <div key={index} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-l-4 border-blue-400 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200">
-                          <p className="text-blue-800 font-medium">💡 {tip}</p>
+                        <div key={index} className="p-4 bg-purple-50 rounded-xl border-l-4 border-purple-400 hover:bg-purple-100 transition-all duration-200">
+                          <p className="text-purple-800 font-medium">💡 {tip}</p>
                         </div>
                       ))}
                       
@@ -652,12 +652,12 @@ const BudgetPageA = () => {
                     <h3 className="text-2xl font-bold mb-6 text-gray-800">📈 종합 평가</h3>
                     <div className="space-y-6">
                       {/* 소비 패턴 점수 */}
-                      <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                      <div className="p-6 bg-purple-50 rounded-xl">
                         <h4 className="font-bold text-purple-800 mb-4">소비 패턴 점수</h4>
                         <div className="flex items-center mb-2">
                           <div className="flex-1 bg-gray-200 rounded-full h-4 mr-4">
                             <div 
-                              className="bg-gradient-to-r from-purple-400 to-pink-500 h-4 rounded-full transition-all duration-1000" 
+                              className="bg-purple-400 h-4 rounded-full transition-all duration-1000" 
                               style={{ width: `${Math.min(100, Math.max(0, (balance / totalIncome) * 100 + 50))}%` }}
                             ></div>
                           </div>
@@ -671,7 +671,7 @@ const BudgetPageA = () => {
                       </div>
 
                       {/* 저축률 분석 */}
-                      <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                      <div className="p-6 bg-green-50 rounded-xl">
                         <h4 className="font-bold text-green-800 mb-4">저축률 분석</h4>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-green-700">현재 저축률</span>
@@ -679,7 +679,7 @@ const BudgetPageA = () => {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-3">
                           <div 
-                            className="bg-gradient-to-r from-green-400 to-emerald-500 h-3 rounded-full transition-all duration-1000"
+                            className="bg-green-400 h-3 rounded-full transition-all duration-1000"
                             style={{ width: `${Math.max(0, Math.min(100, parseFloat(savingsRate)))}%` }}
                           ></div>
                         </div>
@@ -691,7 +691,7 @@ const BudgetPageA = () => {
                       </div>
 
                       {/* 월별 목표 달성률 */}
-                      <div className="p-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
+                      <div className="p-6 bg-yellow-50 rounded-xl">
                         <h4 className="font-bold text-yellow-800 mb-4">목표 달성률</h4>
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
@@ -704,20 +704,20 @@ const BudgetPageA = () => {
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-3">
                             <div 
-                              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-1000"
+                              className="bg-yellow-400 h-3 rounded-full transition-all duration-1000"
                               style={{ 
                                 width: `${savingGoal > 0 ? Math.min(100, (Math.max(0, balance) / savingGoal) * 100) : 0}%` 
                               }}
                             ></div>
                           </div>
-                          <p className="text-sm text-yellow-600">
+                          <p className="text-sm text-orange-400">
                             달성률: {savingGoal > 0 ? Math.min(100, ((Math.max(0, balance) / savingGoal) * 100)).toFixed(0) : 0}%
                           </p>
                         </div>
                       </div>
 
                       {/* 이번 달 종합 평가 */}
-                      <div className="p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-200">
+                      <div className="p-6 bg-indigo-50 rounded-xl border border-indigo-200">
                         <h4 className="font-bold text-indigo-800 mb-3">이번 달 종합 평가</h4>
                         <div className="space-y-2">
                           <div className="flex items-center">
@@ -766,13 +766,13 @@ const BudgetPageA = () => {
             <div className="space-x-4">
               <button 
                 onClick={loadData}
-                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="px-8 py-4 bg-purple-300 text-white rounded-xl hover:bg-purple-400 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 🔄 데이터 새로고침
               </button>
               <button 
                 onClick={() => window.location.href = '/diary'}
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="px-8 py-4 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 📝 소비 기록하기
               </button>
