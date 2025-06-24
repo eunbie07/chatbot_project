@@ -16,6 +16,8 @@ from app.actual_spending_api import router as actual_spending_router
 from app.summary_api import router as summary_router
 from app.diary_api import router as diary_router
 from app.conversation_api import router as conversation_router
+from app.ocr_api import router as ocr_router
+
 
 app = FastAPI()
 
@@ -41,3 +43,21 @@ app.include_router(actual_spending_router)
 app.include_router(summary_router)
 app.include_router(diary_router, prefix="/diary", tags=["diary"])  # ✅ prefix 추가
 app.include_router(conversation_router, prefix="/conversations", tags=["conversations"])
+app.include_router(diary_router, prefix="/diary", tags=["diary"])
+app.include_router(ocr_router, prefix="/ocr", tags=["ocr"])  # ✅ OCR 라우터 등록
+
+@app.get("/")
+async def root():
+    return {
+        "message": "감정-소비 다이어리 API 서버",
+        "version": "1.0.0",
+        "endpoints": {
+            "diary": "/diary",
+            "ocr": "/ocr",
+            "docs": "/docs"
+        }
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "OK", "message": "서버가 정상 작동 중입니다."}

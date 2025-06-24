@@ -87,3 +87,13 @@ test/project/mongosh-2.0.2-linux-x64/
 **/.serverless
 
 **/secret.yaml
+
+keys/
+*.json
+google-vision-key.json
+service-account-*.json
+
+# 환경변수 파일
+.env
+.env.local
+.env.production

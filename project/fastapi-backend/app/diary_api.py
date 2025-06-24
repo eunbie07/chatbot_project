@@ -1,10 +1,11 @@
 # app/diary_api.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 import pymongo
 import os
+import re  # ✅ 추가!
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,12 +16,19 @@ MONGO_URI = os.getenv("MONGODB_URI", "mongodb://mongodb.default.svc.cluster.loca
 client = pymongo.MongoClient(MONGO_URI)
 db = client.consumption_db
 
+class ReceiptData(BaseModel):
+    store: str
+    items: List[str]
+    totalAmount: int
+    date: str
+
 class DiaryEntry(BaseModel):
-    text: str  # user_id 제거 (URL에서 받으니까)
+    text: str
     emotion: Optional[str] = None
     consumption_type: Optional[str] = None
     amount: Optional[int] = None
     satisfaction: Optional[int] = None
+    receiptData: Optional[ReceiptData] = None  # ✅ 영수증 데이터 추가
 
 class DiaryResponse(BaseModel):
     id: str
@@ -110,6 +118,14 @@ def generate_advice(emotion: str, consumption_type: str, amount: int) -> str:
         "음식소비": {
             "스트레스": "스트레스를 음식으로 달래려 하셨군요. 차 한 잔과 심호흡도 도움이 될 거예요.",
             "우울": "음식으로 위안을 찾는 마음 이해해요. 가벼운 산책은 어떨까요?"
+        },
+        "카페소비": {
+            "스트레스": "카페에서 잠시 쉬어가는 것도 좋은 방법이에요.",
+            "중립": "적당한 카페 방문은 일상의 소소한 즐거움이죠!"
+        },
+        "폭식": {
+            "스트레스": "스트레스를 받을 때는 음식보다 가벼운 운동이나 산책을 추천해요.",
+            "우울": "우울할 때의 폭식은 더 우울해질 수 있어요. 따뜻한 차 한 잔은 어떨까요?"
         }
     }
     
@@ -133,9 +149,53 @@ def get_emoji(consumption_type: str) -> str:
         "카페소비": "☕",
         "패션소비": "👗",
         "필수소비": "📋",
+        "폭식": "🍟",
+        "게임결제": "🎮",
+        "술소비": "🍺",
+        "취미소비": "📚",
         "기타": "💰"
     }
     return emoji_map.get(consumption_type, "💰")
+
+def classify_consumption_type_from_receipt(store: str, items: List[str]) -> str:
+    """영수증 정보로 소비 타입 분류"""
+    store_lower = store.lower()
+    items_text = ' '.join(items).lower()
+    
+    if any(keyword in store_lower for keyword in ['스타벅스', '카페', '커피', 'cafe', 'coffee']):
+        return '카페소비'
+    elif any(keyword in store_lower for keyword in ['치킨', '피자', '맥도날드', '버거킹', '음식점']):
+        return '음식소비'
+    elif any(keyword in store_lower for keyword in ['편의점', 'gs25', 'cu', '세븐일레븐']):
+        if any(keyword in items_text for keyword in ['아이스크림', '과자', '라면', '음료']):
+            return '폭식'
+        return '필수소비'
+    elif any(keyword in store_lower for keyword in ['마트', '이마트', '롯데마트']):
+        return '필수소비'
+    elif any(keyword in store_lower for keyword in ['온라인', '쇼핑', '옷', '신발']):
+        return '충동구매'
+    else:
+        return '기타'
+
+def extract_amount_from_text(text: str) -> int:
+    """텍스트에서 금액 추출"""
+    # 정규식으로 금액 패턴 찾기
+    amount_patterns = [
+        r'(\d{1,3}(?:,\d{3})*)\s*원',
+        r'(\d+)\s*원',
+        r'(\d+)만원',
+    ]
+    
+    for pattern in amount_patterns:
+        match = re.search(pattern, text)
+        if match:
+            amount_str = match.group(1).replace(',', '')
+            amount = int(amount_str)
+            if '만원' in match.group(0):
+                amount *= 10000
+            return amount
+    
+    return 0
 
 @router.get("/entries/{user_id}")
 async def get_diary_entries(user_id: str):
@@ -176,11 +236,12 @@ async def get_diary_entries(user_id: str):
                         "satisfaction": satisfaction,
                         "advice": advice,
                         "emoji": get_emoji(consumption_type),
-                        "score": -1 if consumption_type in ["충동구매", "폭식"] else 0
+                        "score": -1 if consumption_type in ["충동구매", "폭식"] else 0,
+                        "receiptData": None  # ✅ 기존 데이터에는 영수증 정보 없음
                     }
                     diary_entries.append(diary_entry)
         
-        # 2. 새로 작성한 일기 (diary_entries 컬렉션) - ✅ 들여쓰기 수정
+        # 2. 새로 작성한 일기 (diary_entries 컬렉션)
         new_entries = db.diary_entries.find({"user_id": user_id})
         for entry in new_entries:
             diary_entry = {
@@ -192,8 +253,9 @@ async def get_diary_entries(user_id: str):
                 "amount": entry["amount"],
                 "satisfaction": entry["satisfaction"],
                 "advice": entry["advice"],
-                "emoji": get_emoji(entry.get("consumptionType", "")),  # ✅ emoji 추가
-                "score": -1 if entry.get("consumptionType") in ["충동구매", "폭식"] else 0  # ✅ score 추가
+                "emoji": get_emoji(entry.get("consumptionType", "")),
+                "score": -1 if entry.get("consumptionType") in ["충동구매", "폭식"] else 0,
+                "receiptData": entry.get("receiptData")  # ✅ 영수증 데이터 포함
             }
             diary_entries.append(diary_entry)
         
@@ -204,24 +266,38 @@ async def get_diary_entries(user_id: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
+
 @router.post("/entries/{user_id}")
 async def create_diary_entry(user_id: str, entry: DiaryEntry):
     try:
-        # NLP 분석으로 감정-소비 패턴 추출
-        emotion = map_emotion_tag("", entry.text)
-        consumption_type = classify_consumption_type("", entry.text)
-        satisfaction = calculate_satisfaction(entry.text)
-        advice = generate_advice(emotion, consumption_type, 0)
+        # 영수증 데이터가 있으면 해당 정보 활용
+        if entry.receiptData:
+            # 영수증에서 추출한 정보 사용
+            emotion = map_emotion_tag("", entry.text)
+            consumption_type = classify_consumption_type_from_receipt(entry.receiptData.store, entry.receiptData.items)
+            amount = entry.receiptData.totalAmount
+            satisfaction = calculate_satisfaction(entry.text)
+            date = entry.receiptData.date
+        else:
+            # 기존 텍스트 분석 방식
+            emotion = map_emotion_tag("", entry.text)
+            consumption_type = classify_consumption_type("", entry.text)
+            amount = extract_amount_from_text(entry.text)
+            satisfaction = calculate_satisfaction(entry.text)
+            date = datetime.now().isoformat().split('T')[0]
+        
+        advice = generate_advice(emotion, consumption_type, amount)
         
         new_entry = {
             "user_id": user_id,
-            "date": datetime.now().isoformat(),
+            "date": date,
             "text": entry.text,
             "emotion": emotion,
-            "consumptionType": consumption_type,  # 프론트엔드 형식에 맞춤
-            "amount": 0,  # 텍스트에서 추출하거나 기본값
+            "consumptionType": consumption_type,
+            "amount": amount,
             "satisfaction": satisfaction,
             "advice": advice,
+            "receiptData": entry.receiptData.dict() if entry.receiptData else None,
             "created_at": datetime.now()
         }
         
@@ -243,7 +319,6 @@ async def get_consumption_analytics(user_id: str):
         stress_shopping_amount = 0
         consumption_by_type = {}
         
-        # ✅ 수정: profile.records로 경로 변경
         records = user.get("profile", {}).get("records", [])
         
         for record in records:
@@ -263,7 +338,7 @@ async def get_consumption_analytics(user_id: str):
             "stressShoppingAmount": stress_shopping_amount,
             "stressShoppingRatio": round(stress_shopping_amount / total_spent * 100, 1) if total_spent > 0 else 0,
             "consumptionByType": consumption_by_type,
-            "avgSatisfaction": 2.3  # 임시값, 실제로는 계산 필요
+            "avgSatisfaction": 2.3
         }
         
     except Exception as e:

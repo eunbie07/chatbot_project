@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
+import { Camera, Upload, X, Check, Brain, Receipt } from 'lucide-react';
 
 // 로컬 이미지 매핑 (public/emotions 폴더 기반)
 const CONSUMPTION_IMAGES = {
@@ -66,7 +67,8 @@ const generateSampleData = () => {
       consumptionType: '충동구매',
       amount: 50000,
       satisfaction: 2,
-      advice: '스트레스를 받을 때는 쇼핑 대신 산책이나 운동을 해보세요. 더 건강하고 경제적인 스트레스 해소법이에요.'
+      advice: '스트레스를 받을 때는 쇼핑 대신 산책이나 운동을 해보세요. 더 건강하고 경제적인 스트레스 해소법이에요.',
+      receiptData: null
     },
     {
       id: 2,
@@ -76,7 +78,12 @@ const generateSampleData = () => {
       consumptionType: '폭식',
       amount: 30000,
       satisfaction: 1,
-      advice: '감정적으로 힘들 때는 친구와 대화하거나 따뜻한 차를 마시며 휴식을 취해보세요.'
+      advice: '감정적으로 힘들 때는 친구와 대화하거나 따뜻한 차를 마시며 휴식을 취해보세요.',
+      receiptData: {
+        store: '치킨나라',
+        items: ['양념치킨 1마리', '콜라 2병'],
+        totalAmount: 30000
+      }
     },
     {
       id: 3,
@@ -219,10 +226,84 @@ const getConsumptionEmoji = (consumptionType) => {
   return emojiMap[consumptionType] || '💰';
 };
 
+// 실제 OCR API 호출 함수 (기존 simulateOCR 대체)
+const processReceiptOCR = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('image', imageFile);
+  
+  try {
+    console.log('📷 영수증 OCR 요청 시작...');
+    
+    const response = await fetch('https://eunbie.site/api/diary/ocr/receipt', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('✅ OCR 성공:', result.data);
+      return result.data;
+    } else {
+      console.error('❌ OCR 실패:', result.error);
+      throw new Error(result.error);
+    }
+  } catch (error) {
+    console.error('OCR API 호출 실패:', error);
+    
+    // API 실패시 사용자에게 알림
+    if (error.message.includes('fetch')) {
+      throw new Error('서버에 연결할 수 없습니다. 네트워크를 확인해주세요.');
+    } else {
+      throw new Error(`영수증 인식에 실패했습니다: ${error.message}`);
+    }
+  }
+};
+
+// Base64 이미지로 OCR 호출하는 함수 (대안)
+const processReceiptOCRBase64 = async (imageFile) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = async (e) => {
+      try {
+        const base64Image = e.target.result;
+        
+        const response = await fetch('https://eunbie.site/api/diary/ocr/receipt-base64', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          resolve(result.data);
+        } else {
+          reject(new Error(result.error));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('이미지 파일을 읽을 수 없습니다.'));
+    };
+    
+    reader.readAsDataURL(imageFile);
+  });
+};
+
 export default function EmotionConsumptionDiary() {
   const { user } = useUser();
   const user_id = user?.username || "soyeon123"; // fallback
   const cardRefs = useRef([]);
+  const fileInputRef = useRef(null);
   const [selectedView, setSelectedView] = useState('grid');
   const [diaryEntries, setDiaryEntries] = useState([]);
   const [analytics, setAnalytics] = useState({});
@@ -230,6 +311,12 @@ export default function EmotionConsumptionDiary() {
   const [showWriteForm, setShowWriteForm] = useState(false);
   const [newDiaryText, setNewDiaryText] = useState('');
   const [error, setError] = useState(null);
+
+  // OCR 관련 state
+  const [showOCRModal, setShowOCRModal] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrResult, setOcrResult] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
@@ -277,6 +364,73 @@ export default function EmotionConsumptionDiary() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // React 컴포넌트에서 사용할 handleImageUpload 함수 수정
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 파일 형식 체크
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    // 파일 크기 체크 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('파일 크기는 10MB 이하여야 합니다.');
+      return;
+    }
+
+    // 이미지 프리뷰 설정
+    const reader = new FileReader();
+    reader.onload = (e) => setSelectedImage(e.target.result);
+    reader.readAsDataURL(file);
+
+    setShowOCRModal(true);
+    setOcrLoading(true);
+    setOcrResult(null);
+
+    try {
+      // OCR 처리 (실제 API 호출)
+      const result = await processReceiptOCR(file);
+      setOcrResult(result);
+    } catch (error) {
+      console.error('OCR 처리 실패:', error);
+      alert(`영수증 인식에 실패했습니다.\n${error.message}\n\n다시 시도해주세요.`);
+      setShowOCRModal(false);
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  // OCR 서비스 상태 확인 함수 (선택사항)
+  const checkOCRHealth = async () => {
+    try {
+      const response = await fetch('https://eunbie.site/api/diary/ocr/health');
+      const result = await response.json();
+      
+      console.log('OCR 서비스 상태:', result);
+      return result.status === 'OK';
+    } catch (error) {
+      console.error('OCR 서비스 상태 확인 실패:', error);
+      return false;
+    }
+  };
+
+  // OCR 결과 확인 후 일기 작성
+  const handleOCRConfirm = () => {
+    if (!ocrResult) return;
+
+    // OCR 결과를 바탕으로 일기 폼 자동 채우기
+    const autoText = `${ocrResult.store}에서 ${ocrResult.totalAmount.toLocaleString()}원을 소비했다. ${ocrResult.items.join(', ')}을 구매했는데, `;
+    
+    setNewDiaryText(autoText);
+    setShowWriteForm(true);
+    setShowOCRModal(false);
+    setSelectedImage(null);
+    // ocrResult는 유지해서 일기 저장시 함께 저장
   };
 
   const handleDownloadCard = async (index) => {
@@ -381,7 +535,7 @@ export default function EmotionConsumptionDiary() {
       ctx.fillStyle = '#666666';
       ctx.font = 'italic 18px Arial, sans-serif';
       y += 60;
-      ctx.fillText('Chatbot AI 조언', canvas.width / 2, y);
+      ctx.fillText('🤖 AI 조언', canvas.width / 2, y);
       
       ctx.font = '16px Arial, sans-serif';
       const advice = entry.advice;
@@ -439,15 +593,23 @@ export default function EmotionConsumptionDiary() {
     }
 
     try {
+      const requestBody = {
+        text: newDiaryText
+      };
+
+      // OCR 결과가 있으면 함께 전송
+      if (ocrResult) {
+        requestBody.receiptData = ocrResult;
+      }
+
       const response = await fetch(`https://eunbie.site/api/diary/entries/${user_id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          text: newDiaryText  // user_id는 URL에 있으니 제거
-        }),
+        body: JSON.stringify(requestBody),
       });
+      
       if (!response.ok) {
         throw new Error('일기 저장에 실패했습니다');
       }
@@ -456,6 +618,7 @@ export default function EmotionConsumptionDiary() {
       await loadDiaryData();
       setNewDiaryText('');
       setShowWriteForm(false);
+      setOcrResult(null); // OCR 결과 초기화
       
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -557,7 +720,7 @@ export default function EmotionConsumptionDiary() {
           marginBottom: '12px',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)'
         }}>
-           Emotional Spending Diary 
+          💸 Emotional Spending Diary
         </h1>
         <p style={{
           fontSize: '1.2rem',
@@ -618,6 +781,28 @@ export default function EmotionConsumptionDiary() {
           >
             ✍️ {showWriteForm ? '작성 취소' : '소비 기록하기'}
           </button>
+
+          {/* 영수증 스캔 버튼 */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              backgroundColor: 'rgba(34, 197, 94, 0.9)',
+              color: 'white',
+              border: '2px solid rgba(34, 197, 94, 0.5)',
+              padding: '12px 24px',
+              borderRadius: '25px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Receipt size={20} />
+            📷 영수증 스캔
+          </button>
           
           <button
             onClick={() => setSelectedView('grid')}
@@ -653,6 +838,196 @@ export default function EmotionConsumptionDiary() {
       </div>
 
       <div style={{ padding: '0 20px', paddingBottom: '40px' }}>
+        {/* 숨겨진 파일 입력 */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          style={{ display: 'none' }}
+        />
+
+        {/* OCR 모달 */}
+        {showOCRModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '24px',
+              padding: '32px',
+              maxWidth: '500px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '24px'
+              }}>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  color: '#374151',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  margin: 0
+                }}>
+                  <Brain size={24} color="#667eea" />
+                  영수증 AI 분석
+                </h3>
+                <button
+                  onClick={() => setShowOCRModal(false)}
+                  style={{
+                    color: '#9ca3af',
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* 이미지 프리뷰 */}
+              {selectedImage && (
+                <div style={{ marginBottom: '24px' }}>
+                  <img
+                    src={selectedImage}
+                    alt="업로드된 영수증"
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb'
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* OCR 진행 상태 */}
+              {ocrLoading && (
+                <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                  <div style={{
+                    display: 'inline-block',
+                    width: '32px',
+                    height: '32px',
+                    border: '4px solid #667eea',
+                    borderTop: '4px solid transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    marginBottom: '16px'
+                  }} />
+                  <p style={{ color: '#6b7280', marginBottom: '8px' }}>AI가 영수증을 분석중입니다...</p>
+                  <p style={{ fontSize: '14px', color: '#9ca3af' }}>상호명, 금액, 구매 내역을 읽고 있어요</p>
+                </div>
+              )}
+
+              {/* OCR 결과 */}
+              {ocrResult && !ocrLoading && (
+                <div>
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: '1px solid #bbf7d0',
+                    marginBottom: '24px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '12px'
+                    }}>
+                      <Check size={20} color="#16a34a" />
+                      <span style={{ fontWeight: '600', color: '#166534' }}>분석 완료!</span>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div>
+                        <span style={{ fontSize: '14px', color: '#6b7280' }}>매장명:</span>
+                        <p style={{ fontWeight: '600', color: '#374151', margin: '4px 0' }}>{ocrResult.store}</p>
+                      </div>
+                      
+                      <div>
+                        <span style={{ fontSize: '14px', color: '#6b7280' }}>구매 항목:</span>
+                        <p style={{ color: '#374151', margin: '4px 0' }}>{ocrResult.items.join(', ')}</p>
+                      </div>
+                      
+                      <div>
+                        <span style={{ fontSize: '14px', color: '#6b7280' }}>총 금액:</span>
+                        <p style={{
+                          fontWeight: 'bold',
+                          fontSize: '18px',
+                          color: '#667eea',
+                          margin: '4px 0'
+                        }}>
+                          {ocrResult.totalAmount.toLocaleString()}원
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <span style={{ fontSize: '14px', color: '#6b7280' }}>날짜:</span>
+                        <p style={{ color: '#374151', margin: '4px 0' }}>
+                          {new Date(ocrResult.date).toLocaleDateString('ko-KR')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => setShowOCRModal(false)}
+                      style={{
+                        flex: 1,
+                        backgroundColor: '#f3f4f6',
+                        color: '#374151',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={handleOCRConfirm}
+                      style={{
+                        flex: 1,
+                        backgroundColor: '#667eea',
+                        color: 'white',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      일기 작성하기
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 일기 작성 폼 */}
         {showWriteForm && (
           <div style={{
@@ -672,6 +1047,31 @@ export default function EmotionConsumptionDiary() {
             }}>
               오늘의 감정-소비 패턴을 기록해보세요 💸
             </h3>
+
+            {/* OCR 결과가 있을 때 미리보기 */}
+            {ocrResult && (
+              <div style={{
+                backgroundColor: '#fef3c7',
+                border: '1px solid #fbbf24',
+                borderRadius: '12px',
+                padding: '16px',
+                marginBottom: '20px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '8px'
+                }}>
+                  <Receipt size={16} color="#d97706" />
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#92400e' }}>영수증 정보</span>
+                </div>
+                <p style={{ fontSize: '14px', color: '#92400e', margin: 0 }}>{ocrResult.store}</p>
+                <p style={{ fontSize: '12px', color: '#b45309', margin: '4px 0 0 0' }}>
+                  {ocrResult.items.join(', ')} - {ocrResult.totalAmount.toLocaleString()}원
+                </p>
+              </div>
+            )}
             
             <textarea
               value={newDiaryText}
@@ -713,7 +1113,10 @@ export default function EmotionConsumptionDiary() {
               
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={() => setShowWriteForm(false)}
+                  onClick={() => {
+                    setShowWriteForm(false);
+                    setOcrResult(null);
+                  }}
                   style={{
                     backgroundColor: '#e9ecef',
                     color: '#6c757d',
@@ -740,7 +1143,7 @@ export default function EmotionConsumptionDiary() {
                     cursor: newDiaryText.trim().length >= 10 ? 'pointer' : 'not-allowed'
                   }}
                 >
-                  패턴 분석하기
+                  🤖 패턴 분석하기
                 </button>
               </div>
             </div>
@@ -832,6 +1235,31 @@ export default function EmotionConsumptionDiary() {
                   }}>
                     {getConsumptionEmoji(entry.consumptionType)} {entry.consumptionType}
                   </div>
+
+                  {/* 영수증 데이터 표시 */}
+                  {entry.receiptData && (
+                    <div style={{
+                      backgroundColor: '#fef3c7',
+                      border: '1px solid #fbbf24',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      marginBottom: '16px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '8px'
+                      }}>
+                        <Receipt size={16} color="#d97706" />
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#92400e' }}>영수증 정보</span>
+                      </div>
+                      <p style={{ fontSize: '12px', color: '#92400e', margin: 0 }}>{entry.receiptData.store}</p>
+                      <p style={{ fontSize: '11px', color: '#b45309', margin: '4px 0 0 0' }}>
+                        {entry.receiptData.items.join(', ')}
+                      </p>
+                    </div>
+                  )}
 
                   {/* 날짜와 금액 */}
                   <div style={{
@@ -939,7 +1367,7 @@ export default function EmotionConsumptionDiary() {
                         top: '-8px',
                         left: '20px',
                         fontSize: '16px'
-                      }}>Chatbot</div>
+                      }}>🤖</div>
                       <p style={{
                         fontSize: '13px',
                         color: '#5a6c7d',
@@ -980,7 +1408,7 @@ export default function EmotionConsumptionDiary() {
                     e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
                   }}
                 >
-                  Download
+                  📥 소비 카드 다운로드
                 </button>
               </div>
             ))}
@@ -1069,6 +1497,31 @@ export default function EmotionConsumptionDiary() {
                       )}
                     </div>
                   </div>
+
+                  {/* 영수증 데이터 표시 */}
+                  {entry.receiptData && (
+                    <div style={{
+                      backgroundColor: '#fef3c7',
+                      border: '1px solid #fbbf24',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      marginBottom: '16px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '8px'
+                      }}>
+                        <Receipt size={16} color="#d97706" />
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#92400e' }}>영수증 정보</span>
+                      </div>
+                      <p style={{ fontSize: '14px', color: '#92400e', margin: 0 }}>{entry.receiptData.store}</p>
+                      <p style={{ fontSize: '14px', color: '#b45309', margin: '4px 0 0 0' }}>
+                        {entry.receiptData.items.join(', ')}
+                      </p>
+                    </div>
+                  )}
                   
                   <p style={{
                     fontSize: '15px',
@@ -1108,7 +1561,7 @@ export default function EmotionConsumptionDiary() {
                     borderRadius: '8px',
                     margin: 0
                   }}>
-                    Chatbot {entry.advice}
+                    🤖 {entry.advice}
                   </p>
                 </div>
               </div>

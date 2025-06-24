@@ -1,3 +1,4 @@
+# updated-deployment-probe-fix.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,14 +21,37 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
+        
         envFrom:
         - secretRef:
             name: fastapi-secret
+        
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS_JSON
+          valueFrom:
+            secretKeyRef:
+              name: fastapi-secret
+              key: GOOGLE_APPLICATION_CREDENTIALS_JSON
+        
         resources:
           requests:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "200m"
           limits:
-            memory: "256Mi"
-            cpu: "500m"
-
+            memory: "512Mi"
+            cpu: "1000m"
+            
+        # # ✅ 수정: 존재하는 엔드포인트로 변경
+        # livenessProbe:
+        #   httpGet:
+        #     path: /  # 또는 /docs
+        #     port: 3000
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+          
+        # readinessProbe:
+        #   httpGet:
+        #     path: /  # 또는 /docs
+        #     port: 3000
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5

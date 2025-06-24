@@ -4,13 +4,22 @@ metadata:
   name: app-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Master 노드에만 배포되도록 하는 어노테이션
+    nginx.ingress.kubernetes.io/affinity: |
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
 spec:
   ingressClassName: nginx
   rules:
     - host: eunbie.site
       http:
         paths:
-          # 1. React 정적 서비스 먼저
+          # React 정적 파일 먼저 배치
           - path: /(.*)
             pathType: ImplementationSpecific
             backend:
@@ -18,8 +27,7 @@ spec:
                 name: frontend
                 port:
                   number: 80
-
-          # 2. Node.js API 다음
+          # API 경로
           - path: /api(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
