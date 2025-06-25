@@ -31,15 +31,31 @@ const ChatBot = ({ onConversationComplete }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [s3Key, setS3Key] = useState(null);
   const [userInputs, setUserInputs] = useState({ spending: '', emotion: '', effect: '' });
+  
+  // 추가: 컴포넌트 마운트 후 잠시 기다리는 상태
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
-  const { user } = useUser();
+  
+  // useUser 사용
+  const { user, isLoading } = useUser();
+
+  // 추가: 초기화 지연 처리
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 1000); // 1초로 증가 (URL 파라미터 처리 시간 확보)
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // 초기화 useEffect
   useEffect(() => {
-    initializeChat();
-  }, []);
+    if (!isInitializing && user?.username) {
+      initializeChat();
+    }
+  }, [isInitializing, user]);
 
   // 유틸리티 함수들
   const getTime = () => new Date().toTimeString().slice(0, 5);
@@ -60,9 +76,42 @@ const ChatBot = ({ onConversationComplete }) => {
     setUserInputs({ spending: '', emotion: '', effect: '' });
   };
 
-  // 로그인되지 않은 경우 처리
+  // 수정된 로그인 체크 부분
+  if (isLoading || isInitializing) {
+    return (
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        <div>채팅봇을 준비하고 있어요...</div>
+        <div style={{ fontSize: '12px', color: '#666' }}>사용자 정보를 확인하고 있습니다</div>
+      </div>
+    );
+  }
+
   if (!user?.username) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>로그인이 필요합니다.</div>;
+    return (
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        <div>로그인이 필요합니다.</div>
+        <div style={{ fontSize: '12px', color: '#666' }}>
+          URL: ?user=사용자명 형태로 접속하거나
+        </div>
+        <div style={{ fontSize: '12px', color: '#666' }}>
+          팀원 페이지에서 로그인 후 다시 접속해주세요.
+        </div>
+      </div>
+    );
   }
 
   const user_id = user.username;
@@ -251,7 +300,7 @@ const ChatBot = ({ onConversationComplete }) => {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      <ChatHeader>Mindful Spending Chatbot</ChatHeader>
+      <ChatHeader>Mindful Spending Chatbot - {user.username}님</ChatHeader>
 
       <ChatArea style={{
         flex: 1,

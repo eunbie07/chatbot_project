@@ -9,6 +9,8 @@ export default function ChatDetailPage() {
   const [latestConversation, setLatestConversation] = useState(null);
   const [analytics, setAnalytics] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { user } = useUser();
   const user_id = user?.username || "soyeon123";
@@ -113,7 +115,12 @@ export default function ChatDetailPage() {
           justifyContent: 'space-between'
         }}>
           <div>
-            <h2 style={{ fontSize: '28px', marginBottom: '10px', color: colors.textColor }}>
+            <h2 style={{ 
+              fontSize: '28px', 
+              marginBottom: '10px', 
+              color: colors.textColor,
+              fontWeight: 'bold'
+            }}>
               나의 감정 소비 기록
             </h2>
             <p style={{ 
@@ -134,7 +141,12 @@ export default function ChatDetailPage() {
                 borderRadius: '12px',
                 marginBottom: '20px'
               }}>
-                <strong style={{ color: colors.textColor }}>나의 패턴 분석</strong>
+                <strong style={{ 
+                  color: colors.textColor,
+                  fontWeight: 'bold'
+                }}>
+                  나의 패턴 분석
+                </strong>
                 <div style={{ marginTop: '15px', lineHeight: '1.8' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ color: colors.lightTextColor }}>총 대화 세션:</span>
@@ -170,7 +182,12 @@ export default function ChatDetailPage() {
                 borderRadius: '12px',
                 marginBottom: '15px'
               }}>
-                <strong style={{ color: colors.textColor }}>최근 대화 요약</strong>
+                <strong style={{ 
+                  color: colors.textColor,
+                  fontWeight: 'bold'
+                }}>
+                  최근 대화 요약
+                </strong>
                 {conversations.slice(0, 3).map((conv, index) => (
                   <div key={index} style={{
                     marginTop: '15px',
@@ -298,7 +315,8 @@ export default function ChatDetailPage() {
           <h3 style={{ 
             fontSize: '20px', 
             marginBottom: '20px', 
-            color: colors.textColor 
+            color: colors.textColor,
+            fontWeight: 'bold'
           }}>
             💡 감정 소비 개선 팁
           </h3>
@@ -310,7 +328,10 @@ export default function ChatDetailPage() {
               borderRadius: '8px',
               marginBottom: '15px'
             }}>
-              <strong style={{ color: colors.primaryAccentColor }}>
+              <strong style={{ 
+                color: colors.primaryAccentColor,
+                fontWeight: 'bold'
+              }}>
                 🎯 이번 주 목표
               </strong>
               <p style={{ color: colors.lightTextColor, marginTop: '8px', margin: 0 }}>
@@ -327,7 +348,10 @@ export default function ChatDetailPage() {
               borderRadius: '8px',
               marginBottom: '15px'
             }}>
-              <strong style={{ color: colors.secondaryAccentColor }}>
+              <strong style={{ 
+                color: colors.secondaryAccentColor,
+                fontWeight: 'bold'
+              }}>
                 ✨ 대안 활동
               </strong>
               <ul style={{ 
@@ -352,7 +376,10 @@ export default function ChatDetailPage() {
                 textAlign: 'center'
               }}>
                 <div style={{ fontSize: '20px', marginBottom: '5px' }}>🎉</div>
-                <strong style={{ color: colors.secondaryAccentColor }}>
+                <strong style={{ 
+                  color: colors.secondaryAccentColor,
+                  fontWeight: 'bold'
+                }}>
                   개선율 {analytics.improvementRate}% 달성!
                 </strong>
                 <p style={{ 

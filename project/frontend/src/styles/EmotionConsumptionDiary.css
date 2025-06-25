@@ -1,0 +1,786 @@
+/* EmotionConsumptionDiary.css - 수정된 버전 */
+
+/* 기본 컨테이너 */
+.diary-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* 로딩 스타일 */
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.loading-content {
+  text-align: center;
+  color: #667eea;
+}
+
+.loading-content p {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 스피너 애니메이션 */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e9ecef;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 헤더 스타일 */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+/* 통계 섹션 */
+.stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  background-color: rgba(255,255,255,0.2);
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+}
+
+/* 액션 버튼들 */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.btn-primary.active {
+  background-color: rgba(255,255,255,0.3);
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.btn-success {
+  background-color: rgba(34, 197, 94, 0.9);
+  color: white;
+  border: 2px solid rgba(34, 197, 94, 0.5);
+}
+
+.btn-receipt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* 콘텐츠 영역 */
+.content {
+  padding: 0 20px;
+  padding-bottom: 40px;
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.modal-close {
+  color: #9ca3af;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+}
+
+.image-preview {
+  margin-bottom: 24px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.ocr-loading {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.ocr-loading p {
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+/* OCR 결과 스타일 */
+.result-success {
+  background-color: #f0fdf4;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 24px;
+}
+
+.success-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.success-header span {
+  font-weight: 600;
+  color: #166534;
+}
+
+.result-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-item .label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.detail-item .value {
+  font-weight: 600;
+  color: #374151;
+}
+
+.detail-item .amount {
+  font-weight: bold;
+  font-size: 18px;
+  color: #667eea;
+}
+
+/* 일기 작성 폼 */
+.write-form {
+  max-width: 600px;
+  margin: 0 auto 40px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.form-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #667eea;
+  text-align: center;
+}
+
+/* 영수증 미리보기 */
+.receipt-preview {
+  background-color: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.preview-header span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.store-name {
+  font-size: 14px;
+  color: #92400e;
+  margin: 0;
+}
+
+.items-info {
+  font-size: 12px;
+  color: #b45309;
+  margin: 4px 0 0 0;
+}
+
+.diary-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.diary-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.char-count {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+/* 수정된 form-actions - 문제 해결 */
+.form-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0; /* 추가: 축소 방지 */
+}
+
+/* 일반 버튼 스타일 개선 */
+.form-actions button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap; /* 추가: 텍스트 줄바꿈 방지 */
+  min-width: 80px; /* 추가: 최소 너비 보장 */
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 빈 상태 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.empty-state p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+/* 카드 그리드 */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 일기 카드 */
+.diary-card {
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  width: 100%;
+  max-width: 380px;
+  height: 650px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border: 3px solid;
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.diary-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.diary-card:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 20px 60px rgba(0,0,0,0.2);
+}
+
+/* 소비 유형 태그 */
+.consumption-tag {
+  align-self: flex-start;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* 영수증 정보 */
+.receipt-info {
+  background-color: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.receipt-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.receipt-header span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.receipt-store {
+  font-size: 12px;
+  color: #92400e;
+  margin: 0;
+}
+
+.receipt-items {
+  font-size: 11px;
+  color: #b45309;
+  margin: 4px 0 0 0;
+}
+
+/* 날짜와 금액 */
+.date-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.date {
+  font-size: 14px;
+  color: #8e8e93;
+  font-weight: 500;
+}
+
+.amount {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* 카드 이미지 */
+.card-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  min-height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.card-image:hover img {
+  transform: scale(1.05);
+}
+
+/* 감정과 만족도 */
+.emotion-satisfaction {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f8f9ff;
+  border-radius: 12px;
+}
+
+.emotion,
+.satisfaction {
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* 일기 내용 */
+.diary-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.diary-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #2c3e50;
+  font-weight: 400;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  word-break: keep-all;
+}
+
+/* AI 조언 */
+.ai-advice {
+  padding: 18px;
+  border-radius: 16px;
+  border-left: 4px solid;
+  margin-top: auto;
+  position: relative;
+}
+
+.ai-icon {
+  position: absolute;
+  top: -8px;
+  left: 20px;
+  font-size: 16px;
+}
+
+.ai-advice p {
+  font-size: 13px;
+  color: #5a6c7d;
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0;
+  margin-top: 4px;
+  word-break: keep-all;
+}
+
+/* 다운로드 버튼 */
+.download-btn {
+  margin-top: 20px;
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  min-width: 160px;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.download-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .stats-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .diary-card {
+    max-width: 100%;
+    height: auto;
+    min-height: 500px;
+  }
+
+  .write-form {
+    margin: 0 20px 40px;
+    padding: 20px;
+  }
+
+  .modal-content {
+    margin: 0 10px;
+    padding: 20px;
+  }
+
+  .btn {
+    min-height: 44px;
+  }
+
+  /* 모바일에서 form-actions 개선 */
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .form-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 30px 15px;
+  }
+
+  .content {
+    padding: 0 15px;
+    padding-bottom: 30px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  .diary-card {
+    padding: 20px;
+    min-height: 450px;
+  }
+
+  .card-image {
+    height: 150px;
+    min-height: 150px;
+  }
+
+  .diary-text {
+    font-size: 14px;
+  }
+
+  .ai-advice p {
+    font-size: 12px;
+  }
+}
+
+/* 접근성 및 기타 스타일 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .action-buttons,
+  .download-btn,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .diary-card {
+    box-shadow: none;
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .modal-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-buttons button {
+    width: 100%;
+    min-height: 44px;
+  }
+}

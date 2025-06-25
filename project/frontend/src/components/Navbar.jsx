@@ -1,9 +1,24 @@
+// src/components/Navbar.jsx
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import chatbotLogo from '../../public/chatbot_main.png';
+import '../styles/Navbar.css';
+
+const nameMap = {
+  soyeon123: '김소연',
+  eunwoo123: '차은우',
+  minseok123: '박민석'
+};
 
 const Navbar = () => {
   const { user, logout } = useUser();
   const navigate = useNavigate();
+
+  // ✅ user가 존재할 때만 displayName 생성
+  const displayName = user?.username
+    ? `${nameMap[user.username] || user.username} 님`
+    : '';
 
   const handleLogout = () => {
     logout();
@@ -11,146 +26,35 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '20px 40px',
-      backgroundColor: '#fff',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-      marginBottom: '20px'
-    }}>
-      {/* 왼쪽: 로고와 메뉴 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
-        <div style={{ 
-          fontSize: '22px', 
-          fontWeight: 'bold', 
-          color: '#6C63FF', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px' 
-        }}>
-          <img 
-            src="/chatbot_main.png" 
-            alt="리마인봇 로고" 
-            style={{ height: '80px', verticalAlign: 'middle' }} 
-          />
+    <nav className="navbar">
+      <div className="navbar-left-group">
+        <Link to="/" className="logo">
+          <img src={chatbotLogo} alt="로고" className="logo-image" />
+        </Link>
+        <div className="navbar-center">
+          <a href="https://bass-worthy-actively.ngrok-free.app">Home</a>
+          <a href="https://bass-worthy-actively.ngrok-free.app/analysis">Analysis</a>
+          <Link to="/chat">Chat</Link>
+          <Link to="/diary">Diary</Link>
+          <Link to="/budgetA">Budget</Link>
         </div>
-        
-        <ul style={{ 
-          display: 'flex', 
-          gap: '30px', 
-          listStyle: 'none', 
-          margin: 0, 
-          padding: 0 
-        }}>
-          <li>
-            <Link to="/" style={{ 
-              textDecoration: 'none', 
-              fontSize: '20px', 
-              color: '#666' 
-            }}>
-              Home
-            </Link>
-          </li>
-          <li>
-            <span
-              onClick={() => window.location.href = 'https://preferably-united-wren.ngrok-free.app/'}
-              style={{ 
-                cursor: 'pointer', 
-                fontSize: '20px', 
-                color: '#666', 
-                textDecoration: 'none' 
-              }}
-            >
-              Analysis
-            </span>
-          </li>
-          <li>
-            <Link to="/chat" style={{ 
-              textDecoration: 'none', 
-              fontSize: '20px', 
-              color: '#666' 
-            }}>
-              Chat
-            </Link>
-          </li>
-          <li>
-            <Link to="/diary" style={{ 
-              textDecoration: 'none', 
-              fontSize: '20px', 
-              color: '#666' 
-            }}>
-              Diary
-            </Link>
-          </li>
-          <li>
-            <Link to="/budget" style={{ 
-              textDecoration: 'none', 
-              fontSize: '20px', 
-              color: '#666' 
-            }}>
-              Budget
-            </Link>
-          </li>
-          <li>
-            <Link to="/budgetA" style={{ 
-              textDecoration: 'none', 
-              fontSize: '20px', 
-              color: '#666' 
-            }}>
-              Budget
-            </Link>
-          </li>
-        </ul>
       </div>
 
-      {/* 오른쪽: 사용자 정보와 로그아웃 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div className="navbar-right">
+        <a
+          href="https://preferably-united-wren.ngrok-free.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <button className="fetch-btn">금융 데이터 가져오기</button>
+        </a>
         {user ? (
           <>
-            <span style={{ 
-              fontSize: '16px', 
-              color: '#666',
-              fontWeight: '500'
-            }}>
-              안녕하세요, {user.username}님!
-            </span>
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: '#6C63FF',
-                color: 'white',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#5A52D5'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#6C63FF'}
-            >
-              로그아웃
-            </button>
+            <span className="welcome-text">{displayName}</span>
+            <button className="auth-btn" onClick={handleLogout}>로그아웃</button>
           </>
         ) : (
-          <Link 
-            to="/login"
-            style={{
-              backgroundColor: '#6C63FF',
-              color: 'white',
-              textDecoration: 'none',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              transition: 'background-color 0.2s'
-            }}
-          >
-            로그인
-          </Link>
+          <Link to="/login" className="auth-link">로그인</Link>
         )}
       </div>
     </nav>
