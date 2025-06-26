@@ -1,4 +1,4 @@
-// EmotionConsumptionDiary.js
+// EmotionConsumptionDiary.js - 수정된 버전
 import React, { useRef, useState, useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { X, Check, Brain, Receipt } from 'lucide-react';
@@ -8,7 +8,7 @@ import '../styles/EmotionConsumptionDiary.css';
 const CONSUMPTION_IMAGES = {
   충동구매: {
     '우울': '/emotions/impulse-sad.png',
-    '스트레스': '/emotions/impulse-stress.png', // 배열에서 단일 이미지로 변경
+    '스트레스': '/emotions/impulse-stress.png',
     '화남': '/emotions/impulse-angry.png',
     '외로움': '/emotions/impulse-lonely.png'
   },
@@ -67,49 +67,64 @@ const SAMPLE_DIARY_ENTRIES = [
     consumptionType: '폭식',
     amount: 30000,
     satisfaction: 1,
-    advice: '감정적으로 힘들 때는 친구와 대화하거나 따뜻한 차를 마시며 휴식을 취해보세요.',
-    receiptData: {
-      store: '치킨나라',
-      items: ['양념치킨 1마리', '콜라 2병'],
-      totalAmount: 30000
-    }
+    advice: '감정적으로 힘들 때는 친구와 대화하거나 따뜻한 차를 마시며 휴식을 취해보세요.'
   }
 ];
 
-// 이미지 경로 가져오기 함수 (강화된 버전)
+// 날짜 유효성 검사 및 수정 함수
+const validateAndFixDate = (dateStr) => {
+  if (!dateStr) {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // 기본 ISO 형식 확인
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (isoDateRegex.test(dateStr)) {
+    try {
+      const date = new Date(dateStr);
+      const currentDate = new Date();
+      
+      // 유효한 날짜이고 2020년 이후, 현재보다 과거인지 확인
+      if (!isNaN(date.getTime()) && 
+          date.getFullYear() >= 2020 && 
+          date <= currentDate) {
+        return dateStr;
+      }
+    } catch (e) {
+      console.warn('Invalid date format:', dateStr);
+    }
+  }
+
+  // 잘못된 형식이면 현재 날짜 반환
+  console.warn(`Invalid date "${dateStr}" replaced with current date`);
+  return new Date().toISOString().split('T')[0];
+};
+
+// 이미지 경로 가져오기 함수
 const getConsumptionImage = (emotion, consumptionType, entryId) => {
-  console.log('getConsumptionImage 호출:', { emotion, consumptionType, entryId });
-  
   const images = CONSUMPTION_IMAGES[consumptionType]?.[emotion];
-  console.log('매핑된 이미지:', images);
   
   // 배열인 경우
   if (Array.isArray(images) && images.length > 0) {
     const index = (entryId || 0) % images.length;
     const selectedImage = images[index];
-    console.log('배열에서 선택된 이미지:', selectedImage, '(인덱스:', index, ')');
     
-    // undefined 체크
     if (selectedImage && typeof selectedImage === 'string') {
       return selectedImage;
     }
-    console.log('배열 이미지가 유효하지 않음, fallback으로 이동');
   }
   
   // 단일 이미지인 경우
   if (images && typeof images === 'string') {
-    console.log('단일 이미지 사용:', images);
     return images;
   }
   
   // fallback 이미지들
   const fallbackImages = FALLBACK_IMAGES[consumptionType];
-  console.log('fallback 이미지 확인:', fallbackImages);
   
   if (Array.isArray(fallbackImages) && fallbackImages.length > 0) {
     const index = (entryId || 0) % fallbackImages.length;
     const selectedFallback = fallbackImages[index];
-    console.log('fallback 배열에서 선택:', selectedFallback);
     
     if (selectedFallback && typeof selectedFallback === 'string') {
       return selectedFallback;
@@ -117,17 +132,14 @@ const getConsumptionImage = (emotion, consumptionType, entryId) => {
   }
   
   if (fallbackImages && typeof fallbackImages === 'string') {
-    console.log('fallback 단일 이미지 사용:', fallbackImages);
     return fallbackImages;
   }
   
   // 최종 기본 이미지
-  const defaultImage = '/emotions/default.png';
-  console.log('최종 기본 이미지 사용:', defaultImage);
-  return defaultImage;
+  return '/emotions/default.png';
 };
 
-// 안전한 이미지 컴포넌트 (개선된 버전)
+// 안전한 이미지 컴포넌트
 const SafeImage = ({ emotion, consumptionType, entryId, alt }) => {
   const [imageSrc, setImageSrc] = useState('');
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -136,7 +148,6 @@ const SafeImage = ({ emotion, consumptionType, entryId, alt }) => {
 
   useEffect(() => {
     const src = getConsumptionImage(emotion, consumptionType, entryId);
-    console.log('SafeImage: 이미지 소스 설정:', src);
     setImageSrc(src);
     setImageLoaded(false);
     setImageError(false);
@@ -144,35 +155,25 @@ const SafeImage = ({ emotion, consumptionType, entryId, alt }) => {
   }, [emotion, consumptionType, entryId]);
 
   const handleLoad = () => {
-    console.log('SafeImage: 이미지 로딩 성공:', imageSrc);
     setImageLoaded(true);
     setImageError(false);
   };
 
   const handleError = () => {
-    console.log('SafeImage: 이미지 로딩 실패:', imageSrc, 'retry:', retryCount);
-    
     if (retryCount === 0) {
-      // 첫 번째 실패: 기본 이미지로 시도
-      console.log('SafeImage: 기본 이미지로 재시도');
       setImageSrc('/emotions/default.png');
       setRetryCount(1);
       setImageError(false);
     } else if (retryCount === 1) {
-      // 두 번째 실패: 안전한 외부 이미지로 시도
-      console.log('SafeImage: 외부 이미지로 재시도');
       setImageSrc('https://via.placeholder.com/400x300/f8f9fa/6c757d?text=Image+Not+Found');
       setRetryCount(2);
       setImageError(false);
     } else {
-      // 최종 실패: 에러 상태로 표시
-      console.log('SafeImage: 최종 실패, 에러 상태로 전환');
       setImageError(true);
       setImageLoaded(false);
     }
   };
 
-  // 에러 상태일 때
   if (imageError) {
     return (
       <div style={{
@@ -200,7 +201,6 @@ const SafeImage = ({ emotion, consumptionType, entryId, alt }) => {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {/* 로딩 상태 */}
       {!imageLoaded && (
         <div style={{
           position: 'absolute',
@@ -227,15 +227,9 @@ const SafeImage = ({ emotion, consumptionType, entryId, alt }) => {
             marginBottom: '8px'
           }} />
           <span style={{ fontSize: '12px' }}>로딩중...</span>
-          {retryCount > 0 && (
-            <small style={{ fontSize: '10px', marginTop: '4px', opacity: 0.7 }}>
-              재시도 중... ({retryCount}/2)
-            </small>
-          )}
         </div>
       )}
 
-      {/* 실제 이미지 */}
       <img
         src={imageSrc}
         alt={alt}
@@ -292,17 +286,47 @@ const processReceiptOCR = async (imageFile) => {
   const formData = new FormData();
   formData.append('image', imageFile);
   
-  const response = await fetch('https://eunbie.site/api/diary/ocr/receipt', {
-    method: 'POST',
-    body: formData
-  });
-  
-  const result = await response.json();
-  
-  if (result.success) {
-    return result.data;
-  } else {
-    throw new Error(result.error || '영수증 인식에 실패했습니다.');
+  try {
+    const response = await fetch('https://eunbie.site/api/diary/ocr/receipt', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // 날짜 검증 추가
+      if (result.data.date) {
+        result.data.date = validateAndFixDate(result.data.date);
+      } else {
+        result.data.date = new Date().toISOString().split('T')[0];
+      }
+      
+      // 금액 검증
+      if (typeof result.data.totalAmount !== 'number') {
+        result.data.totalAmount = parseInt(result.data.totalAmount) || 0;
+      }
+      
+      // 매장명 검증
+      if (!result.data.store) {
+        result.data.store = '알 수 없는 매장';
+      }
+      
+      // 구매 항목 검증
+      if (!Array.isArray(result.data.items) || result.data.items.length === 0) {
+        result.data.items = ['구매 항목'];
+      }
+      
+      return result.data;
+    } else {
+      throw new Error(result.error || '영수증 인식에 실패했습니다.');
+    }
+  } catch (error) {
+    console.error('OCR 처리 중 오류:', error);
+    if (error.message.includes('network') || error.message.includes('fetch')) {
+      throw new Error('네트워크 연결을 확인해주세요.');
+    }
+    throw error;
   }
 };
 
@@ -349,7 +373,10 @@ export default function EmotionConsumptionDiary() {
       const currentMonth = currentDate.getMonth();
       
       const filteredEntries = (entriesData.entries || []).filter(entry => {
-        const entryDate = new Date(entry.date);
+        const validatedDate = validateAndFixDate(entry.date);
+        entry.date = validatedDate;
+        
+        const entryDate = new Date(validatedDate);
         return entryDate.getFullYear() === currentYear && entryDate.getMonth() === currentMonth;
       });
 
@@ -365,7 +392,8 @@ export default function EmotionConsumptionDiary() {
       const monthString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
       
       const filteredSampleData = SAMPLE_DIARY_ENTRIES.filter(entry => {
-        return entry.date.startsWith(monthString);
+        const validatedDate = validateAndFixDate(entry.date);
+        return validatedDate.startsWith(monthString);
       });
       
       setDiaryEntries(filteredSampleData);
@@ -426,16 +454,22 @@ export default function EmotionConsumptionDiary() {
     }
   };
 
-  // OCR 결과 확인
+  // OCR 결과 확인 - 수정된 부분
   const handleOCRConfirm = () => {
     if (!ocrResult) return;
 
-    const autoText = `${ocrResult.store}에서 ${ocrResult.totalAmount.toLocaleString()}원을 소비했다. ${ocrResult.items.join(', ')}을 구매했는데, `;
+    const validatedDate = validateAndFixDate(ocrResult.date);
+    const formattedDate = new Date(validatedDate).toLocaleDateString('ko-KR');
+    
+    // OCR 정보를 포함한 자동 텍스트 생성 (영수증 정보는 카드에만 표시)
+    const autoText = `${formattedDate}에 ${ocrResult.store}에서 ${ocrResult.totalAmount.toLocaleString()}원을 소비했다. `;
     
     setNewDiaryText(autoText);
     setShowWriteForm(true);
     setShowOCRModal(false);
     setSelectedImage(null);
+    
+    // OCR 결과는 유지하되, 일기 텍스트에는 포함하지 않음
   };
 
   // 카드 다운로드
@@ -481,7 +515,7 @@ export default function EmotionConsumptionDiary() {
     }
   };
 
-  // 일기 저장
+  // 일기 저장 - 수정된 부분
   const handleWriteDiary = async () => {
     if (newDiaryText.trim().length < 10) {
       alert('일기를 최소 10자 이상 작성해주세요.');
@@ -500,12 +534,22 @@ export default function EmotionConsumptionDiary() {
         body: JSON.stringify(requestBody),
       });
       
-      if (!response.ok) throw new Error('일기 저장에 실패했습니다');
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('서버 응답 오류:', errorData);
+        throw new Error('일기 저장에 실패했습니다');
+      }
 
+      const result = await response.json();
+      console.log('저장 성공:', result);
+
+      // 저장 후 데이터 새로고침
       await loadDiaryData();
+      
+      // 폼 초기화
       setNewDiaryText('');
       setShowWriteForm(false);
-      setOcrResult(null);
+      setOcrResult(null); // OCR 결과 초기화
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -514,7 +558,12 @@ export default function EmotionConsumptionDiary() {
     }
   };
 
-  const sortedEntries = [...diaryEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // 날짜순 정렬
+  const sortedEntries = [...diaryEntries].sort((a, b) => {
+    const dateA = validateAndFixDate(a.date);
+    const dateB = validateAndFixDate(b.date);
+    return new Date(dateB) - new Date(dateA);
+  });
 
   // 로딩 상태
   if (loading) {
@@ -605,6 +654,7 @@ export default function EmotionConsumptionDiary() {
                 <div className="ocr-loading">
                   <div className="spinner" />
                   <p>AI가 영수증을 분석중입니다...</p>
+                  <small>잠시만 기다려주세요...</small>
                 </div>
               )}
 
@@ -618,6 +668,11 @@ export default function EmotionConsumptionDiary() {
                     </div>
                     
                     <div className="result-details">
+                      <div className="detail-item">
+                        <span className="label">날짜: </span>
+                        <span className="value">{new Date(ocrResult.date).toLocaleDateString('ko-KR')}</span>
+                      </div>
+                      
                       <div className="detail-item">
                         <span className="label">매장명: </span>
                         <span className="value">{ocrResult.store}</span>
@@ -637,7 +692,7 @@ export default function EmotionConsumptionDiary() {
                 </div>
               )}
 
-              {/* 버튼들을 항상 표시하되, 로딩 중일 때는 비활성화 */}
+              {/* 버튼들 */}
               <div style={{ 
                 marginTop: '20px',
                 display: 'flex',
@@ -659,7 +714,7 @@ export default function EmotionConsumptionDiary() {
                     opacity: ocrLoading ? 0.6 : 1,
                     fontWeight: '600',
                     fontSize: '14px',
-                    minWidth: '100px', // 최소 너비 증가
+                    minWidth: '100px',
                     flex: '0 0 auto'
                   }}
                 >
@@ -678,7 +733,7 @@ export default function EmotionConsumptionDiary() {
                     opacity: (ocrLoading || !ocrResult) ? 0.6 : 1,
                     fontWeight: '600',
                     fontSize: '14px',
-                    minWidth: '140px', // 최소 너비 증가
+                    minWidth: '140px',
                     flex: '0 0 auto'
                   }}
                 >
@@ -694,24 +749,21 @@ export default function EmotionConsumptionDiary() {
           <div className="write-form">
             <h3 className="form-title">오늘의 감정-소비 패턴을 기록해보세요 💸</h3>
 
-            {/* OCR 결과 미리보기 */}
+            {/* OCR 결과가 있을 때만 간단한 안내 메시지 */}
             {ocrResult && (
               <div className="receipt-preview">
                 <div className="preview-header">
                   <Receipt size={16} color="#d97706" />
-                  <span>영수증 정보</span>
+                  <span>영수증이 인식되었습니다</span>
                 </div>
-                <p className="store-name">{ocrResult.store}</p>
-                <p className="items-info">
-                  {ocrResult.items.join(', ')} - {ocrResult.totalAmount.toLocaleString()}원
-                </p>
+                <p className="store-name">정보가 자동으로 포함됩니다</p>
               </div>
             )}
             
             <textarea
               value={newDiaryText}
               onChange={(e) => setNewDiaryText(e.target.value)}
-              placeholder="오늘 어떤 감정으로 무엇을 소비했나요?"
+              placeholder="오늘 어떤 감정으로 무엇을 소비했나요? 감정과 소비 내용을 자세히 적어주세요."
               className="diary-textarea"
             />
             
@@ -723,6 +775,7 @@ export default function EmotionConsumptionDiary() {
                   onClick={() => {
                     setShowWriteForm(false);
                     setOcrResult(null);
+                    setNewDiaryText('');
                   }}
                   className="btn btn-secondary"
                 >
@@ -731,9 +784,9 @@ export default function EmotionConsumptionDiary() {
                 <button
                   onClick={handleWriteDiary}
                   disabled={newDiaryText.trim().length < 10}
-                  className="btn btn-primary"
+                  className="btn btn-lavender"
                 >
-                  🤖 패턴 분석하기
+                  기록하기
                 </button>
               </div>
             </div>
@@ -752,92 +805,108 @@ export default function EmotionConsumptionDiary() {
 
         {/* 일기 카드 목록 */}
         <div className="cards-grid">
-          {sortedEntries.map((entry, index) => (
-            <div key={entry.id} className="card-wrapper">
-              <div
-                ref={(el) => (cardRefs.current[index] = el)}
-                className="diary-card"
-                style={{ borderColor: `${getEmotionColor(entry.consumptionType)}20` }}
-              >
-                {/* 소비 유형 태그 */}
-                <div 
-                  className="consumption-tag"
+          {sortedEntries.map((entry, index) => {
+            const validatedDate = validateAndFixDate(entry.date);
+            
+            return (
+              <div key={entry.id} className="card-wrapper">
+                <div
+                  ref={(el) => (cardRefs.current[index] = el)}
+                  className="diary-card"
+                  style={{ borderColor: `${getEmotionColor(entry.consumptionType)}20` }}
+                >
+                  {/* 소비 유형 태그 */}
+                  <div 
+                    className="consumption-tag"
+                    style={{ backgroundColor: getEmotionColor(entry.consumptionType) }}
+                  >
+                    {getConsumptionEmoji(entry.consumptionType)} {entry.consumptionType}
+                  </div>
+
+                  {/* 영수증 정보는 카드에 표시하지 않음 - 깔끔한 디자인 */}
+
+                  {/* 날짜와 금액 */}
+                  <div className="date-amount">
+                    <span className="date">
+                      {new Date(validatedDate).toLocaleDateString('ko-KR')}
+                    </span>
+                    {entry.amount > 0 && (
+                      <span 
+                        className="amount"
+                        style={{ color: getEmotionColor(entry.consumptionType) }}
+                      >
+                        {entry.amount.toLocaleString()}원
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 이미지 - SafeImage 컴포넌트 사용 */}
+                  <div className="card-image">
+                    <SafeImage
+                      emotion={entry.emotion}
+                      consumptionType={entry.consumptionType}
+                      entryId={entry.id}
+                      alt={`${entry.emotion} ${entry.consumptionType} 일러스트`}
+                    />
+                  </div>
+
+                  {/* 감정과 만족도 */}
+                  <div className="emotion-satisfaction">
+                    <span className="emotion">감정: {entry.emotion}</span>
+                    <span className="satisfaction">만족도: {'⭐'.repeat(entry.satisfaction || 3)}</span>
+                  </div>
+
+                  {/* 일기 내용 - 더 명확하게 표시 */}
+                  <div className="diary-content">
+                    <div className="diary-text-section">
+                      <h4 style={{ 
+                        fontSize: '14px', 
+                        color: '#667eea', 
+                        marginBottom: '8px',
+                        fontWeight: '600'
+                      }}>
+                        📝 나의 기록
+                      </h4>
+                      <p className="diary-text">"{entry.text}"</p>
+                    </div>
+
+                    {/* AI 조언 말풍선 */}
+                    {entry.advice && (
+                      <div 
+                        className="ai-advice"
+                        style={{ 
+                          backgroundColor: `${getEmotionColor(entry.consumptionType)}08`,
+                          borderLeftColor: getEmotionColor(entry.consumptionType)
+                        }}
+                      >
+                        <div className="ai-icon">🤖</div>
+                        <div>
+                          <h5 style={{ 
+                            fontSize: '12px', 
+                            color: '#667eea', 
+                            marginBottom: '4px',
+                            fontWeight: '600'
+                          }}>
+                            AI 조언
+                          </h5>
+                          <p>{entry.advice}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 다운로드 버튼 */}
+                <button
+                  onClick={() => handleDownloadCard(index)}
+                  className="download-btn"
                   style={{ backgroundColor: getEmotionColor(entry.consumptionType) }}
                 >
-                  {getConsumptionEmoji(entry.consumptionType)} {entry.consumptionType}
-                </div>
-
-                {/* 영수증 데이터 표시 */}
-                {entry.receiptData && (
-                  <div className="receipt-info">
-                    <div className="receipt-header">
-                      <Receipt size={16} color="#d97706" />
-                      <span>영수증 정보</span>
-                    </div>
-                    <p className="receipt-store">{entry.receiptData.store}</p>
-                    <p className="receipt-items">{entry.receiptData.items.join(', ')}</p>
-                  </div>
-                )}
-
-                {/* 날짜와 금액 */}
-                <div className="date-amount">
-                  <span className="date">
-                    {new Date(entry.date).toLocaleDateString('ko-KR')}
-                  </span>
-                  {entry.amount > 0 && (
-                    <span 
-                      className="amount"
-                      style={{ color: getEmotionColor(entry.consumptionType) }}
-                    >
-                      {entry.amount.toLocaleString()}원
-                    </span>
-                  )}
-                </div>
-
-                {/* 이미지 - SafeImage 컴포넌트 사용 */}
-                <div className="card-image">
-                  <SafeImage
-                    emotion={entry.emotion}
-                    consumptionType={entry.consumptionType}
-                    entryId={entry.id}
-                    alt={`${entry.emotion} ${entry.consumptionType} 일러스트`}
-                  />
-                </div>
-
-                {/* 감정과 만족도 */}
-                <div className="emotion-satisfaction">
-                  <span className="emotion">감정: {entry.emotion}</span>
-                  <span className="satisfaction">만족도: {'⭐'.repeat(entry.satisfaction || 3)}</span>
-                </div>
-
-                {/* 일기 내용 */}
-                <div className="diary-content">
-                  <p className="diary-text">"{entry.text}"</p>
-
-                  {/* AI 조언 말풍선 */}
-                  <div 
-                    className="ai-advice"
-                    style={{ 
-                      backgroundColor: `${getEmotionColor(entry.consumptionType)}08`,
-                      borderLeftColor: getEmotionColor(entry.consumptionType)
-                    }}
-                  >
-                    <div className="ai-icon">🤖</div>
-                    <p>{entry.advice}</p>
-                  </div>
-                </div>
+                  📥 소비 카드 다운로드
+                </button>
               </div>
-
-              {/* 다운로드 버튼 */}
-              <button
-                onClick={() => handleDownloadCard(index)}
-                className="download-btn"
-                style={{ backgroundColor: getEmotionColor(entry.consumptionType) }}
-              >
-                📥 소비 카드 다운로드
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

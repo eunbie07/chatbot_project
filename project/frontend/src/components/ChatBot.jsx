@@ -300,7 +300,7 @@ const ChatBot = ({ onConversationComplete }) => {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      <ChatHeader>Mindful Spending Chatbot - {user.username}님</ChatHeader>
+      <ChatHeader>Mindful Spending Chatbot</ChatHeader>
 
       <ChatArea style={{
         flex: 1,

@@ -128,15 +128,15 @@ const CategoryBreakdown = ({ normalizedActuals, normalizedBudgets }) => (
         const percentage = totalExpense > 0 ? ((amount / totalExpense) * 100).toFixed(1) : 0;
         const budget = normalizedBudgets[category] || 0;
         const isOverBudget = amount > budget && budget > 0;
-        
+                
         return (
           <div key={category} className={`p-4 rounded-xl transition-all duration-200 hover:scale-102 ${
-            isOverBudget ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'
+            isOverBudget ? 'bg-purple-50 hover:bg-purple-100' : 'bg-gray-50 hover:bg-gray-100'
           }`}>
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
                 <div 
-                  className="w-6 h-6 rounded-full mr-4 shadow-sm" 
+                  className="w-6 h-6 rounded-full mr-4 shadow-sm"
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
                 <div>
@@ -144,21 +144,21 @@ const CategoryBreakdown = ({ normalizedActuals, normalizedBudgets }) => (
                   {budget > 0 && (
                     <div className="text-xs text-gray-500">
                       예산: {formatCurrency(budget)} 
-                      {isOverBudget && <span className="text-red-500 ml-1">초과!</span>}
+                      {isOverBudget && <span className="text-purple-500 ml-1">초과!</span>}
                     </div>
                   )}
                 </div>
               </div>
-              <span className={`font-bold text-lg ${isOverBudget ? 'text-red-400' : 'text-gray-800'}`}>
+              <span className={`font-bold text-lg ${isOverBudget ? 'text-purple-400' : 'text-gray-800'}`}>
                 {formatCurrency(amount)}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className={`h-2 rounded-full transition-all duration-500`}
-                style={{ 
+                style={{
                   width: `${percentage}%`,
-                  backgroundColor: isOverBudget ? '#ef4444' : COLORS[index % COLORS.length]
+                  backgroundColor: isOverBudget ? '#a855f7' : COLORS[index % COLORS.length]
                 }}
               />
             </div>
@@ -204,7 +204,14 @@ const BudgetComparisonChart = ({ data }) => (
           }
           return null;
         }} />
-        <Legend />
+        <Legend 
+          wrapperStyle={{
+            paddingTop: '20px',
+            color: '#000000',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}
+        />
         <Bar dataKey="예산" fill="#C4B5FD" radius={[4, 4, 0, 0]} name="예산" />
         <Bar dataKey="실제소비" fill="#F472B6" radius={[4, 4, 0, 0]} name="실제 소비" />
       </BarChart>
@@ -219,13 +226,13 @@ const BudgetAnalysisTab = ({ budgetAnalysis }) => (
       {budgetAnalysis.map((item) => (
         <div key={item.category} className={`p-6 rounded-xl border-l-4 transition-all duration-200 hover:scale-102 ${
           item.status === 'over' 
-            ? 'bg-red-50 border-red-400 hover:bg-red-100' 
+            ? 'bg-purple-50 border-purple-400 hover:bg-purple-100'
             : 'bg-green-50 border-green-400 hover:bg-green-100'
         }`}>
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <h4 className={`text-xl font-bold mb-2 ${
-                item.status === 'over' ? 'text-red-800' : 'text-green-800'
+                item.status === 'over' ? 'text-purple-800' : 'text-green-800'
               }`}>
                 {item.category}
               </h4>
@@ -243,7 +250,7 @@ const BudgetAnalysisTab = ({ budgetAnalysis }) => (
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div 
                     className={`h-3 rounded-full transition-all duration-500 ${
-                      item.status === 'over' ? 'bg-red-500' : 'bg-green-500'
+                      item.status === 'over' ? 'bg-purple-500' : 'bg-green-500'
                     }`}
                     style={{ width: `${Math.min(100, item.percentage)}%` }}
                   />
@@ -252,12 +259,12 @@ const BudgetAnalysisTab = ({ budgetAnalysis }) => (
             </div>
             <div className="text-right ml-6">
               <div className={`text-2xl font-bold ${
-                item.status === 'over' ? 'text-red-400' : 'text-green-600'
+                item.status === 'over' ? 'text-purple-400' : 'text-green-600'
               }`}>
                 {item.status === 'over' ? '+' : ''}{formatCurrency(Math.abs(item.difference))}
               </div>
               <div className={`text-lg font-semibold ${
-                item.status === 'over' ? 'text-red-500' : 'text-green-500'
+                item.status === 'over' ? 'text-purple-500' : 'text-green-500'
               }`}>
                 {item.percentage.toFixed(1)}%
               </div>
@@ -536,8 +543,8 @@ const BudgetPageA = () => {
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Budget & Spending Tracker 
           </h1>
-          <p className="text-gray-600 text-lg">실제 데이터 기반 소비 분석</p>
-          
+          {/* <p className="text-gray-600 text-lg">실제 데이터 기반 소비 분석</p>
+           */}
           <button 
             onClick={loadData}
             disabled={loading}

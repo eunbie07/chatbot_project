@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
-from datetime import datetime, time
+from datetime import datetime, timedelta
 import pymongo
 import os
 import re
@@ -61,6 +61,82 @@ EMOTION_CONSUMPTION_KEYWORDS = {
         "reasons": ["지루함", "성취감", "스트레스"]
     }
 }
+
+def validate_and_fix_date(date_str: str) -> str:
+    """날짜 형식 검증 및 수정"""
+    if not date_str:
+        return datetime.now().isoformat().split('T')[0]
+    
+    try:
+        # 기본 ISO 형식 시도
+        parsed = datetime.strptime(date_str, '%Y-%m-%d')
+        # 날짜가 너무 과거거나 미래면 현재 날짜 사용
+        current_date = datetime.now()
+        if parsed.year < 2020 or parsed > current_date + timedelta(days=1):
+            return current_date.isoformat().split('T')[0]
+        return date_str
+    except ValueError:
+        pass
+    
+    try:
+        # 다른 형식들 시도
+        formats = [
+            '%Y/%m/%d',
+            '%Y.%m.%d', 
+            '%m/%d/%Y',
+            '%d/%m/%Y',
+            '%Y-%m-%d'
+        ]
+        
+        for fmt in formats:
+            try:
+                parsed_date = datetime.strptime(date_str, fmt)
+                # 날짜가 유효한 범위인지 확인
+                current_date = datetime.now()
+                if parsed_date.year < 2020 or parsed_date > current_date + timedelta(days=1):
+                    return current_date.isoformat().split('T')[0]
+                return parsed_date.strftime('%Y-%m-%d')
+            except ValueError:
+                continue
+                
+        # 숫자만 추출해서 날짜 재구성 시도
+        numbers = re.findall(r'\d+', date_str)
+        if len(numbers) >= 3:
+            year, month, day = numbers[0], numbers[1], numbers[2]
+            
+            # 연도가 2자리면 20xx로 변환
+            if len(year) == 2:
+                year = '20' + year
+            
+            # 월/일 범위 체크 및 교정
+            month = int(month)
+            day = int(day)
+            
+            # 월이 12를 초과하면 월/일 순서 바꾸기
+            if month > 12 and day <= 12:
+                month, day = day, month
+            
+            # 여전히 유효하지 않으면 현재 날짜 사용
+            if month > 12 or month < 1 or day > 31 or day < 1:
+                return datetime.now().isoformat().split('T')[0]
+            
+            try:
+                validated_date = datetime(int(year), month, day)
+                # 날짜가 유효한 범위인지 확인
+                current_date = datetime.now()
+                if validated_date.year < 2020 or validated_date > current_date + timedelta(days=1):
+                    return current_date.isoformat().split('T')[0]
+                return validated_date.strftime('%Y-%m-%d')
+            except ValueError:
+                pass
+                
+    except Exception as e:
+        print(f"날짜 파싱 오류: {e}")
+        pass
+    
+    # 모든 시도가 실패하면 현재 날짜 반환
+    print(f"날짜 '{date_str}' 파싱 실패, 현재 날짜로 대체")
+    return datetime.now().isoformat().split('T')[0]
 
 def classify_consumption_type(항목: str, 상세내역: str) -> str:
     """MongoDB 항목을 소비 타입으로 분류"""
@@ -288,7 +364,7 @@ def check_repetitive_pattern(user_id: str, consumption_type: str) -> bool:
         # 최근 7일간의 기록 확인
         recent_entries = list(db.diary_entries.find({
             "user_id": user_id,
-            "date": {"$gte": (datetime.now() - datetime.timedelta(days=7)).isoformat().split('T')[0]}
+            "date": {"$gte": (datetime.now() - timedelta(days=7)).isoformat().split('T')[0]}
         }).sort("date", -1).limit(10))
         
         # 같은 소비 타입이 3번 이상 반복되면 True
@@ -387,6 +463,34 @@ def extract_amount_from_text(text: str) -> int:
     
     return 0
 
+def validate_receipt_data(receipt_data: dict) -> dict:
+    """영수증 데이터 검증 및 정리"""
+    if not receipt_data:
+        return None
+    
+    # 날짜 검증 및 수정
+    if 'date' in receipt_data:
+        receipt_data['date'] = validate_and_fix_date(receipt_data['date'])
+    else:
+        receipt_data['date'] = datetime.now().isoformat().split('T')[0]
+    
+    # 금액 검증
+    if 'totalAmount' in receipt_data:
+        try:
+            receipt_data['totalAmount'] = int(receipt_data['totalAmount'])
+        except (ValueError, TypeError):
+            receipt_data['totalAmount'] = 0
+    
+    # 매장명 검증
+    if 'store' not in receipt_data or not receipt_data['store']:
+        receipt_data['store'] = '알 수 없는 매장'
+    
+    # 구매 항목 검증
+    if 'items' not in receipt_data or not isinstance(receipt_data['items'], list):
+        receipt_data['items'] = ['구매 항목']
+    
+    return receipt_data
+
 @router.get("/entries/{user_id}")
 async def get_diary_entries(user_id: str):
     try:
@@ -403,6 +507,9 @@ async def get_diary_entries(user_id: str):
             date = record.get("날짜")
             consumption_items = record.get("소비목록", [])
             
+            # 날짜 검증
+            validated_date = validate_and_fix_date(date)
+            
             # 해당 날짜의 소비 항목들을 하나의 일기로 합치기
             if consumption_items:
                 total_amount = sum(item.get("금액", 0) for item in consumption_items if item.get("분류") == "지출")
@@ -414,13 +521,12 @@ async def get_diary_entries(user_id: str):
                     emotion = map_emotion_tag(main_item.get("감정개입", ""), main_item.get("상세내역", ""))
                     consumption_type = classify_consumption_type(main_item.get("항목", ""), main_item.get("상세내역", ""))
                     satisfaction = calculate_satisfaction(main_item.get("상세내역", ""))
-                    # ✅ 수정: 카드에 표시되는 총 금액과 동일한 값으로 조언 생성
-                    individual_amount = main_item.get("금액", 0)  # 주요 항목의 개별 금액
+                    individual_amount = main_item.get("금액", 0)
                     advice = generate_advice(emotion, consumption_type, individual_amount, user_id)
                     
                     diary_entry = {
-                        "id": date,
-                        "date": date,
+                        "id": validated_date,
+                        "date": validated_date,
                         "text": main_item.get("상세내역", ""),
                         "emotion": emotion,
                         "consumptionType": consumption_type,
@@ -436,9 +542,12 @@ async def get_diary_entries(user_id: str):
         # 2. 새로 작성한 일기 (diary_entries 컬렉션)
         new_entries = db.diary_entries.find({"user_id": user_id})
         for entry in new_entries:
+            # 저장된 날짜도 검증
+            validated_date = validate_and_fix_date(entry.get("date", ""))
+            
             diary_entry = {
                 "id": str(entry["_id"]),
-                "date": entry["date"],
+                "date": validated_date,
                 "text": entry["text"],
                 "emotion": entry["emotion"],
                 "consumptionType": entry["consumptionType"],
@@ -457,29 +566,49 @@ async def get_diary_entries(user_id: str):
         return {"entries": diary_entries, "total": len(diary_entries)}
         
     except Exception as e:
+        print(f"데이터 조회 실패: {str(e)}")
         raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
 
 @router.post("/entries/{user_id}")
 async def create_diary_entry(user_id: str, entry: DiaryEntry):
     try:
+        print(f"일기 작성 요청: user_id={user_id}")
+        print(f"입력 데이터: {entry}")
+        
         # 영수증 데이터가 있으면 해당 정보 활용
         if entry.receiptData:
+            print(f"영수증 데이터 감지: {entry.receiptData}")
+            
+            # 영수증 데이터 검증
+            validated_receipt = validate_receipt_data(entry.receiptData.dict())
+            print(f"검증된 영수증 데이터: {validated_receipt}")
+            
             # 영수증에서 추출한 정보 사용
             emotion = map_emotion_tag("", entry.text)
-            consumption_type = classify_consumption_type_from_receipt(entry.receiptData.store, entry.receiptData.items)
-            amount = entry.receiptData.totalAmount
+            consumption_type = classify_consumption_type_from_receipt(
+                validated_receipt['store'], 
+                validated_receipt['items']
+            )
+            amount = validated_receipt['totalAmount']
             satisfaction = calculate_satisfaction(entry.text)
-            date = entry.receiptData.date
+            date = validated_receipt['date']
+            
+            print(f"영수증 기반 분석 결과: emotion={emotion}, type={consumption_type}, amount={amount}, date={date}")
+            
         else:
+            print("텍스트 분석 모드")
             # 기존 텍스트 분석 방식
             emotion = map_emotion_tag("", entry.text)
             consumption_type = classify_consumption_type("", entry.text)
             amount = extract_amount_from_text(entry.text)
             satisfaction = calculate_satisfaction(entry.text)
             date = datetime.now().isoformat().split('T')[0]
+            
+            print(f"텍스트 기반 분석 결과: emotion={emotion}, type={consumption_type}, amount={amount}, date={date}")
         
         # 개선된 조언 생성 (user_id 포함)
         advice = generate_advice(emotion, consumption_type, amount, user_id)
+        print(f"생성된 조언: {advice}")
         
         new_entry = {
             "user_id": user_id,
@@ -490,15 +619,19 @@ async def create_diary_entry(user_id: str, entry: DiaryEntry):
             "amount": amount,
             "satisfaction": satisfaction,
             "advice": advice,
-            "receiptData": entry.receiptData.dict() if entry.receiptData else None,
+            "receiptData": validated_receipt if entry.receiptData else None,
             "created_at": datetime.now()
         }
         
+        print(f"저장할 데이터: {new_entry}")
+        
         result = db.diary_entries.insert_one(new_entry)
+        print(f"저장 완료: {result.inserted_id}")
         
         return {"message": "저장 완료", "id": str(result.inserted_id)}
         
     except Exception as e:
+        print(f"일기 생성 실패: {str(e)}")
         raise HTTPException(status_code=500, detail=f"일기 생성 실패: {str(e)}")
 
 @router.get("/analytics/{user_id}")
@@ -511,7 +644,9 @@ async def get_consumption_analytics(user_id: str):
         total_spent = 0
         stress_shopping_amount = 0
         consumption_by_type = {}
+        total_entries = 0
         
+        # 기존 데이터 분석
         records = user.get("profile", {}).get("records", [])
         
         for record in records:
@@ -519,6 +654,7 @@ async def get_consumption_analytics(user_id: str):
                 if item.get("분류") == "지출":
                     amount = item.get("금액", 0)
                     total_spent += amount
+                    total_entries += 1
                     
                     item_type = item.get("항목", "")
                     if item_type == "스트레스 쇼핑":
@@ -526,13 +662,93 @@ async def get_consumption_analytics(user_id: str):
                     
                     consumption_by_type[item_type] = consumption_by_type.get(item_type, 0) + amount
         
+        # 새로운 일기 데이터 분석
+        new_entries = db.diary_entries.find({"user_id": user_id})
+        for entry in new_entries:
+            amount = entry.get("amount", 0)
+            total_spent += amount
+            total_entries += 1
+            
+            consumption_type = entry.get("consumptionType", "")
+            if consumption_type in ["충동구매", "폭식"]:
+                stress_shopping_amount += amount
+            
+            consumption_by_type[consumption_type] = consumption_by_type.get(consumption_type, 0) + amount
+        
         return {
             "totalSpent": total_spent,
             "stressShoppingAmount": stress_shopping_amount,
             "stressShoppingRatio": round(stress_shopping_amount / total_spent * 100, 1) if total_spent > 0 else 0,
             "consumptionByType": consumption_by_type,
+            "totalEntries": total_entries,
             "avgSatisfaction": 2.3
         }
         
     except Exception as e:
+        print(f"분석 실패: {str(e)}")
         raise HTTPException(status_code=500, detail=f"분석 실패: {str(e)}")
+
+# OCR 처리 엔드포인트 (영수증 인식)
+@router.post("/ocr/receipt")
+async def process_receipt_ocr(file: bytes):
+    """영수증 OCR 처리"""
+    try:
+        # 실제 OCR 처리 로직은 외부 서비스 연동
+        # 여기서는 샘플 응답 반환
+        
+        # 실제로는 OCR 서비스 호출
+        # result = external_ocr_service.process(file)
+        
+        # 샘플 OCR 결과
+        sample_result = {
+            "store": "곶자 세종점설점",
+            "items": ["새물특별시 세종구 사임당로", "수량 할인", "쌈폭면", "브라운쥬가 시그니쳐 일"],
+            "totalAmount": 11600,
+            "date": "2025-06-25"  # 현재 날짜로 설정
+        }
+        
+        # 결과 검증
+        validated_result = validate_receipt_data(sample_result)
+        
+        return {
+            "success": True,
+            "data": validated_result
+        }
+        
+    except Exception as e:
+        print(f"OCR 처리 실패: {str(e)}")
+        return {
+            "success": False,
+            "error": f"영수증 인식에 실패했습니다: {str(e)}"
+        }
+
+# 기존 잘못된 날짜 데이터 수정을 위한 관리 엔드포인트
+@router.post("/admin/fix-dates")
+async def fix_invalid_dates():
+    """잘못된 날짜 데이터 일괄 수정"""
+    try:
+        fixed_count = 0
+        current_date = datetime.now().isoformat().split('T')[0]
+        
+        # diary_entries 컬렉션의 잘못된 날짜 수정
+        entries = db.diary_entries.find({})
+        for entry in entries:
+            original_date = entry.get('date', '')
+            validated_date = validate_and_fix_date(original_date)
+            
+            if original_date != validated_date:
+                db.diary_entries.update_one(
+                    {"_id": entry["_id"]},
+                    {"$set": {"date": validated_date}}
+                )
+                fixed_count += 1
+                print(f"날짜 수정: {original_date} → {validated_date}")
+        
+        return {
+            "message": f"총 {fixed_count}개의 잘못된 날짜를 수정했습니다",
+            "fixed_count": fixed_count
+        }
+        
+    except Exception as e:
+        print(f"날짜 수정 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"날짜 수정 실패: {str(e)}")

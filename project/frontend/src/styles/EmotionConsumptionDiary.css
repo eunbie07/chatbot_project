@@ -306,38 +306,33 @@
   text-align: center;
 }
 
-/* 영수증 미리보기 */
+/* 영수증 미리보기 - 단순화 */
 .receipt-preview {
-  background-color: #fef3c7;
-  border: 1px solid #fbbf24;
+  background-color: #f0f9ff;
+  border: 1px solid #3b82f6;
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
 }
 
 .preview-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .preview-header span {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #92400e;
+  color: #1d4ed8;
 }
 
 .store-name {
-  font-size: 14px;
-  color: #92400e;
+  font-size: 13px;
+  color: #1e40af;
   margin: 0;
-}
-
-.items-info {
-  font-size: 12px;
-  color: #b45309;
-  margin: 4px 0 0 0;
+  font-weight: 500;
 }
 
 .diary-textarea {
@@ -372,15 +367,14 @@
   color: #6c757d;
 }
 
-/* 수정된 form-actions - 문제 해결 */
+/* form-actions 수정 */
 .form-actions {
   display: flex;
   gap: 8px;
   align-items: center;
-  flex-shrink: 0; /* 추가: 축소 방지 */
+  flex-shrink: 0;
 }
 
-/* 일반 버튼 스타일 개선 */
 .form-actions button {
   padding: 10px 20px;
   border-radius: 10px;
@@ -389,8 +383,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap; /* 추가: 텍스트 줄바꿈 방지 */
-  min-width: 80px; /* 추가: 최소 너비 보장 */
+  white-space: nowrap;
+  min-width: 80px;
 }
 
 .form-actions button:disabled {
@@ -425,7 +419,7 @@
   align-items: center;
 }
 
-/* 일기 카드 */
+/* 일기 카드 - 높이 자동 조정 */
 .diary-card {
   background-color: #ffffff;
   border-radius: 24px;
@@ -433,11 +427,12 @@
   box-shadow: 0 10px 40px rgba(0,0,0,0.12);
   width: 100%;
   max-width: 380px;
-  height: 650px;
+  min-height: 650px; /* 최소 높이만 지정 */
+  height: auto; /* 자동 높이 조정 */
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* 내용이 잘리지 않도록 */
   border: 3px solid;
   transition: all 0.4s ease;
   cursor: pointer;
@@ -465,39 +460,7 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* 영수증 정보 */
-.receipt-info {
-  background-color: #fef3c7;
-  border: 1px solid #fbbf24;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.receipt-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.receipt-header span {
-  font-size: 12px;
-  font-weight: 600;
-  color: #92400e;
-}
-
-.receipt-store {
-  font-size: 12px;
-  color: #92400e;
-  margin: 0;
-}
-
-.receipt-items {
-  font-size: 11px;
-  color: #b45309;
-  margin: 4px 0 0 0;
-}
+/* 영수증 정보 스타일 제거 - 깔끔한 카드 디자인 */
 
 /* 날짜와 금액 */
 .date-amount {
@@ -568,52 +531,61 @@
   font-weight: 600;
 }
 
-/* 일기 내용 */
+/* 일기 내용 - 높이 제한 제거 */
 .diary-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  overflow: hidden;
+  overflow: visible; /* 내용이 잘리지 않도록 */
+}
+
+/* 일기 텍스트 섹션 - 새로 추가 */
+.diary-text-section {
+  background-color: #fafbfc;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 16px;
 }
 
 .diary-text {
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.6;
   color: #2c3e50;
   font-weight: 400;
-  text-align: center;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
+  margin: 0;
   word-break: keep-all;
+  text-align: left; /* 왼쪽 정렬로 변경 */
 }
 
-/* AI 조언 */
+/* AI 조언 - 위치 조정 */
 .ai-advice {
-  padding: 18px;
-  border-radius: 16px;
+  padding: 16px;
+  border-radius: 12px;
   border-left: 4px solid;
-  margin-top: auto;
+  margin-top: 16px; /* auto 대신 고정값 */
   position: relative;
+  background-color: inherit; /* 배경색 확실히 적용 */
 }
 
 .ai-icon {
   position: absolute;
   top: -8px;
-  left: 20px;
+  left: 16px;
   font-size: 16px;
+}
+
+.ai-advice h5 {
+  margin: 0 0 4px 0;
+  padding-top: 4px;
 }
 
 .ai-advice p {
   font-size: 13px;
   color: #5a6c7d;
-  line-height: 1.6;
+  line-height: 1.5;
   font-style: italic;
   margin: 0;
-  margin-top: 4px;
   word-break: keep-all;
 }
 
@@ -687,7 +659,6 @@
     min-height: 44px;
   }
 
-  /* 모바일에서 form-actions 개선 */
   .form-actions {
     flex-direction: column;
     gap: 12px;
@@ -783,4 +754,33 @@
     width: 100%;
     min-height: 44px;
   }
+}
+
+/* 기존 CSS에 추가할 스타일 */
+
+/* 패턴 분석하기 버튼을 위한 라벤더 스타일 */
+.btn-lavender {
+  background: linear-gradient(135deg, #b19cd9 0%, #9b87c4 100%);
+  color: white;
+  border: 2px solid rgba(177, 156, 217, 0.3);
+  box-shadow: 0 4px 15px rgba(177, 156, 217, 0.3);
+}
+
+.btn-lavender:hover {
+  background: linear-gradient(135deg, #a888d1 0%, #8a76b8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(177, 156, 217, 0.4);
+}
+
+.btn-lavender:focus {
+  box-shadow: 0 0 0 3px rgba(177, 156, 217, 0.3);
+}
+
+.btn-lavender:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  box-shadow: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
