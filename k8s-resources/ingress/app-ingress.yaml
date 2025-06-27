@@ -4,7 +4,7 @@ metadata:
   name: app-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
     # Master 노드에만 배포되도록 하는 어노테이션
     nginx.ingress.kubernetes.io/affinity: |
       nodeAffinity:
