@@ -22,4 +22,4 @@ spec:
             - containerPort: 8000
           env:                                  # ✅ 여기에 추가
             - name: FASTAPI_URL
-              value: "http://fastapi:3000"
+              value: "http://fastapi.default.svc.cluster.local:3000"
